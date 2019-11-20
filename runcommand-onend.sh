@@ -47,12 +47,13 @@ saveSRMs() {
 }
 ``
 saveGeneric() {
-    local savesDir=$1
+    local savesDirParent=$1
     local saveFile=$2
+    local savesDir=$3
     echo "Uploading ${saveFile}..."
     { # try
-        cd $savesDir \
-        && tar -czf "${saveFile}" "${savesDir}" \
+        cd $savesDirParent \
+        && tar -czf "${saveFile}" ./ \
         && rclone mkdir $RCLONE_DRIVE \
         && rclone copy -P "${saveFile}" "${RCLONE_DRIVE}" \
         && echo -e "\n${GREEN}***** Saves backed up successfully! *****${PLAIN}\n"
@@ -64,25 +65,28 @@ saveGeneric() {
 }
 
 saveGamecube() {
-    local savesDir="${HOME}/RetroPie/roms/gc/User/GC/"
+    local savesDirParent="${HOME}/RetroPie/roms/gc/User/"
     local saveFile="${TMP}/gc_saves.tar.gz"
+    local savesDir="GC"
 
     echo "Saving gamecube..."
-    saveGeneric "${savesDir}" "${saveFile}"
+    saveGeneric "${savesDirParent}" "${saveFile}" "${savesDir}"
 }
 
 saveWii() {
-    local savesDir="${HOME}/RetroPie/roms/wii/User/Wii/"
+    local savesDirParent="${HOME}/RetroPie/roms/wii/User/"
     local saveFile="${TMP}/wii_saves.tar.gz"
+    local savesDir="Wii"
     echo "Saving wii..."
-    saveGeneric "${savesDir}" "${saveFile}"
+    saveGeneric "${savesDirParent}" "${saveFile}" "${savesDir}"
 }
 
 savePsp() {
-    local savesDir="${HOME}/RetroPie/roms/psp/PSP/SAVEDATA/"
+    local savesDirParent="${HOME}/RetroPie/roms/psp/PSP/"
     local saveFile="${TMP}/psp_saves.tar.gz"
+    local savesDir="SAVEDATA"
     echo "Saving psp..."
-    saveGeneric "${savesDir}" "${saveFile}"
+    saveGeneric "${savesDirParent}" "${saveFile}" "${savesDir}"
 }
 
 case $SYSTEM in 
