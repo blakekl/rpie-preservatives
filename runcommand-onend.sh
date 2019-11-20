@@ -67,7 +67,7 @@ saveGeneric() {
 saveGamecube() {
     local savesDirParent="${HOME}/RetroPie/roms/gc/User/"
     local saveFile="${TMP}/gc_saves.tar.gz"
-    local savesDir="GC"
+    local savesDir="GC/"
 
     echo "Saving gamecube..."
     saveGeneric "${savesDirParent}" "${saveFile}" "${savesDir}"
@@ -76,7 +76,7 @@ saveGamecube() {
 saveWii() {
     local savesDirParent="${HOME}/RetroPie/roms/wii/User/"
     local saveFile="${TMP}/wii_saves.tar.gz"
-    local savesDir="Wii"
+    local savesDir="Wii/"
     echo "Saving wii..."
     saveGeneric "${savesDirParent}" "${saveFile}" "${savesDir}"
 }
@@ -84,7 +84,7 @@ saveWii() {
 savePsp() {
     local savesDirParent="${HOME}/RetroPie/roms/psp/PSP/"
     local saveFile="${TMP}/psp_saves.tar.gz"
-    local savesDir="SAVEDATA"
+    local savesDir="SAVEDATA/"
     echo "Saving psp..."
     saveGeneric "${savesDirParent}" "${saveFile}" "${savesDir}"
 }
