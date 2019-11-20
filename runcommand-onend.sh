@@ -13,15 +13,16 @@ GREEN="\e[92m"
 RED="\e[91m"
 PLAIN="\e[39m"
 TMP="/tmp"
-RCLONE_DRIVE="${HOME}/Retropie-backup:retropie-backup"
+RCLONE_DRIVE="retropie-backup:retropie-backup"
 
 saveSRMs() {
-    local ROMSDir="${HOME}/Retropie/roms"
+    local ROMSDir="${HOME}/RetroPie/roms"
     local CURRENT="current_rom_saves"
     local PREVIOUS="previous_rom_saves"
     local SAVES="${TMP}/srm_saves.tar.gz"
 
-    cd $HOME/$ROMSDir && find -L ./ -name "*.srm" -printf "%f\t%T@\n" | sort > $TMP/$CURRENT
+    echo "Saving srms..."
+    cd $ROMSDir && find -L ./ -name "*.srm" -printf "%f\t%T@\n" | sort > $TMP/$CURRENT
     diff -q $TMP/$PREVIOUS $TMP/$CURRENT &> /dev/null
     isChanged=$?
 
@@ -48,9 +49,11 @@ saveSRMs() {
 saveGeneric() {
     local savesDir=$1
     local saveFile=$2
+    echo "Uploading ${saveFile}..."
     { # try
-        tar -c "${savesDir}" | gzip -n > $SAVES \
+        tar -czf "${saveFile}" "${savesDir}" \
         && rclone mkdir $RCLONE_DRIVE \
+        && rclone copy -P "${saveFile}" "${RCLONE_DRIVE}" \
         && echo -e "\n${GREEN}***** Saves backed up successfully! *****${PLAIN}\n"
     } || { # catch 
             echo -e "${RED}*****  Error saving backups. Try again later. *****${PLAIN}" \
@@ -60,25 +63,28 @@ saveGeneric() {
 }
 
 saveGamecube() {
-    local savesDir="${HOME}/Retropie/roms/gc/User/GC/"
+    local savesDir="${HOME}/RetroPie/roms/gc/User/GC/"
     local saveFile="${TMP}/gc_saves.tar.gz"
 
+    echo "Saving gamecube..."
     saveGeneric "${savesDir}" "${saveFile}"
 }
 
 saveWii() {
-    local savesDir="${HOME}/Retropie/roms/wii/User/Wii/"
+    local savesDir="${HOME}/RetroPie/roms/wii/User/Wii/"
     local saveFile="${TMP}/wii_saves.tar.gz"
+    echo "Saving wii..."
     saveGeneric "${savesDir}" "${saveFile}"
 }
 
 savePsp() {
     local savesDir="${HOME}/RetroPie/roms/psp/PSP/SAVEDATA/"
     local saveFile="${TMP}/psp_saves.tar.gz"
+    echo "Saving psp..."
     saveGeneric "${savesDir}" "${saveFile}"
 }
 
-case SYSTEM in 
+case $SYSTEM in 
     "gc")
     saveGamecube
     ;;
@@ -90,7 +96,7 @@ case SYSTEM in
     "psp")
     savePsp
     ;;
-
+    
     *)
     saveSRMs
     ;;
