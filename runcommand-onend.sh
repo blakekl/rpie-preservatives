@@ -51,7 +51,8 @@ saveGeneric() {
     local saveFile=$2
     echo "Uploading ${saveFile}..."
     { # try
-        tar -czf "${saveFile}" "${savesDir}" \
+        cd $savesDir \
+        && tar -czf "${saveFile}" "${savesDir}" \
         && rclone mkdir $RCLONE_DRIVE \
         && rclone copy -P "${saveFile}" "${RCLONE_DRIVE}" \
         && echo -e "\n${GREEN}***** Saves backed up successfully! *****${PLAIN}\n"
