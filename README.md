@@ -100,8 +100,10 @@ rpie-preservatives works by comparing the modification timestamps of all your sa
 ## FAQ
  - What if I already utilize runcommand for other things?
 
- In that case, rename the files to something else and call them from your own `runcommand-onstart.sh` and `runcommand-onend.sh` files respectively.
+In that case, rename the files to something else and call them from your own `runcommand-onstart.sh` and `runcommand-onend.sh` files respectively. Be sure to send in the arguments passed into the script. As an example, if I renamed the `-onend.sh` file to `backup_saves.sh`, then I'd add this line to the end of my `runcommand-onend.sh` file.
+
+`/opt/retropie/config/all/backup_saves.sh $@`
 
  - What if I have poor internet? Can I perform this once a day or once a week instead?
 
- In this case, you really only need the `-onend.sh` script. Download it and rename it, so that it doesn't get run every time a game is closed. Then, you can setup a cronjob to backup as frequently as you like. Without the `runcommand-onstart.sh` file running, rpie-preservatives will also detect a difference and perform the backup.
+In this case, you really only need the `-onend.sh` script. Download it and rename it, so that it doesn't get run every time a game is closed. Then, you can setup a cronjob to backup as frequently as you like. Without the `runcommand-onstart.sh` file running, rpie-preservatives will also detect a difference and perform the backup.
