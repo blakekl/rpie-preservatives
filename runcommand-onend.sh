@@ -13,10 +13,10 @@ GREEN="\e[92m"
 RED="\e[91m"
 PLAIN="\e[39m"
 TMP="/tmp"
-RCLONE_DRIVE="retropie-backup:retropie-backup"
+RCLONE_DRIVE="${HOME}/Retropie-backup:retropie-backup"
 
 saveSRMs() {
-    local ROMSDir="RetroPie/roms"
+    local ROMSDir="${HOME}/Retropie/roms"
     local CURRENT="current_rom_saves"
     local PREVIOUS="previous_rom_saves"
     local SAVES="${TMP}/srm_saves.tar.gz"
@@ -44,5 +44,54 @@ saveSRMs() {
         echo "Done!"
     fi
 }
+``
+saveGeneric() {
+    local savesDir=$1
+    local saveFile=$2
+    { # try
+        tar -c "${savesDir}" | gzip -n > $SAVES \
+        && rclone mkdir $RCLONE_DRIVE \
+        && echo -e "\n${GREEN}***** Saves backed up successfully! *****${PLAIN}\n"
+    } || { # catch 
+            echo -e "${RED}*****  Error saving backups. Try again later. *****${PLAIN}" \
+            echo -e "${RED}*****  Error saving backups. Try again later. *****${PLAIN}" >&2 \
+            &&  sleep 2
+    }
+}
 
-saveSRMs
+saveGamecube() {
+    local savesDir="${HOME}/Retropie/roms/gc/User/GC/"
+    local saveFile="${TMP}/gc_saves.tar.gz"
+
+    saveGeneric "${savesDir}" "${saveFile}"
+}
+
+saveWii() {
+    local savesDir="${HOME}/Retropie/roms/wii/User/Wii/"
+    local saveFile="${TMP}/wii_saves.tar.gz"
+    saveGeneric "${savesDir}" "${saveFile}"
+}
+
+savePsp() {
+    local savesDir="${HOME}/RetroPie/roms/psp/PSP/SAVEDATA/"
+    local saveFile="${TMP}/psp_saves.tar.gz"
+    saveGeneric "${savesDir}" "${saveFile}"
+}
+
+case SYSTEM in 
+    "gc")
+    saveGamecube
+    ;;
+
+    "wii")
+    saveWii
+    ;;
+
+    "psp")
+    savePsp
+    ;;
+
+    *)
+    saveSRMs
+    ;;
+esac
