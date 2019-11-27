@@ -7,13 +7,34 @@
 #
 # Requires rclone to be installed
 ###############################################################################
+SYSTEM=$1
+EMULATOR=$2
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 PLAIN='\033[0m'
 ROMSDir="/home/blake/RetroPie/roms"
 TMP="/tmp"
-CURRENT="current_rom_saves"
-PREVIOUS="previous_rom_saves"
-SAVES="${TMP}/rom_saves.tar.gz"
 
-cd $ROMSDir && find -L ./ -name "*.srm" -printf "%f\t%T@\n" | sort > $TMP/$PREVIOUS
+createCompareFile() {
+    CURRENT="current_rom_saves"
+    PREVIOUS="previous_rom_saves"
+    SAVES="${TMP}/rom_saves.tar.gz"
+
+    cd $ROMSDir && find -L ./ -name "*.srm" -printf "%f\t%T@\n" | sort > $TMP/$PREVIOUS
+}
+
+case $SYSTEM in
+
+    "gc")
+    ;;
+
+    "wii")
+    ;;
+
+    "psp")
+    ;;
+
+    *)
+    createCompareFile
+    ;;
+esac

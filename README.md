@@ -3,13 +3,14 @@
 ## Installation
 
 ### Install Dependencies
+
 Follow the steps on [rclone.org](https://rclone.org/downloads/) if the below doesn't work.
 
 `curl https://rclone.org/install.sh | sudo bash`
 
-Next you'll need to run `rclone config` to setup you're interface to the cloud storage system. 
+Next you'll need to run `rclone config` to setup you're interface to the cloud storage system.
 
- - **Be sure to name your remote `retropie-backup`**
+- **Be sure to name your remote `retropie-backup`**
 
 The below example is for setting up google drive.
 
@@ -52,7 +53,7 @@ Choose a number from below, or type in your own value
    \ "drive.metadata.readonly"
 scope> 3
 ID of the root folder - leave blank normally.  Fill in to access "Computers" folders. (see docs).
-root_folder_id> 
+root_folder_id>
 Service Account Credentials JSON file path - needed only if you want use SA instead of interactive login.
 service_account_file>
 Remote config
@@ -72,10 +73,10 @@ n) No
 y/n> n
 --------------------
 [remote]
-client_id = 
-client_secret = 
+client_id =
+client_secret =
 scope = drive.file
-root_folder_id = 
+root_folder_id =
 service_account_file =
 token = {"access_token":"XXX","token_type":"Bearer","refresh_token":"XXX","expiry":"2014-03-16T13:57:58.955387075Z"}
 --------------------
@@ -89,21 +90,27 @@ y/e/d> y
 
 ### Install rpie-preservatives
 
-Download the runcommand-onend.sh and runcommand-onstart.sh files and place them in `/opt/retropie/configs/all/`. 
-Launch any emulator and exit to create your first backup file. You can find the file from your drive root in a folder called `retropie-backup/srm_saves.tar.gz`
+- Download the `rpie-preservatives-onend.sh` and `rpie-preservatives-onstart.sh` files and place them in `/opt/retropie/configs/all/`.
+- run this in a terminal `echo "/opt/retropie/configs/all/rpie-preservatives-onstart.sh" >> /opt/retropie/configs/all/runcommand-onstart.sh && echo "/opt/retropie/configs/all/rpie-preservatives-onend.sh" >> /opt/retropie/configs/all/runcommand-onend.sh
+- Launch any emulator and exit to create your first backup file. You can find the file from your drive root in a folder called `retropie-backup/srm_saves.tar.gz`
 
-From now on, this file will be updated any time you close a game if the modification timestamp is different from when you started the game.
+From now on, this file will be updated any time you close a game and have made changes to your save files.
 
 ## How it works
-rpie-preservatives works by comparing the modification timestamps of all your save files when a game is launched and whene it is closed. If there is a difference, creates the `.tar.gz` file with the modified timestamp data removed. It then uses rclone to upload to your cloud storage. Rclone performs a hash check before uploading to ensure the files are different. If the files are the same, then no upload will occur.
+
+rpie-preservatives works by comparing the modification timestamps of all your save files when a game is launched and whene it is closed. If there is a difference, it creates the `.tar.gz` file with the modified timestamp data removed. It then uses rclone to upload to your cloud storage. Rclone performs a hash check before uploading to ensure the files are different. If the files are the same, then no upload will occur.
+
+Currently, the scripts handles backing up any cores that store their saves in `.srm` files. It also supports the following cores that do not store saves in `.srm` files.
+
+- ppsspp
+- lr-dolphin (gamecube and wii. Saves backed up separately for each system).
 
 ## FAQ
- - What if I already utilize runcommand for other things?
 
-In that case, rename the files to something else and call them from your own `runcommand-onstart.sh` and `runcommand-onend.sh` files respectively. Be sure to send in the arguments passed into the script. As an example, if I renamed the `-onend.sh` file to `backup_saves.sh`, then I'd add this line to the end of my `runcommand-onend.sh` file.
+- What if I already utilize runcommand for other things?
 
-`/opt/retropie/config/all/backup_saves.sh $@`
+That's fine. The commands in the installer only add a command to run these scripts as part of the runcommand scripts. It will not replace anything else in the scripts.
 
- - What if I have poor internet? Can I perform this once a day or once a week instead?
+- What if I have poor internet? Can I perform this once a day or once a week instead?
 
-In this case, you really only need the `-onend.sh` script. Download it and rename it, so that it doesn't get run every time a game is closed. Then, you can setup a cronjob to backup as frequently as you like. Without the `runcommand-onstart.sh` file running, rpie-preservatives will also detect a difference and perform the backup.
+In this case, you really only need the `-onend.sh` script. Download it to wherevery ou like. Then, you can setup a cronjob to backup as frequently as you like.
