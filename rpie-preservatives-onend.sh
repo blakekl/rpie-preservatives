@@ -89,6 +89,17 @@ savePsp() {
     saveGeneric "${savesDirParent}" "${saveFile}" "${savesDir}"
 }
 
+saveDreamcast() {
+    local savesDirParent="${HOME}/RetroPie/.reicast/";
+    local saveFile="${TMP}/reicast_saves.tar.gz";
+    if [ "$EMULATOR" = "lr-flycast" ] ; then
+        savesDirParent="${HOME}/RetroPie/BIOS/dc/";
+        saveFile="${TMP}/flycast_saves.tar.gz";
+    fi
+    local savesDir="./";
+    saveGeneric "${savesDirParent}" "${saveFile}" "${savesDir}"
+}
+
 case $SYSTEM in 
     "gc")
     saveGamecube
@@ -100,6 +111,10 @@ case $SYSTEM in
 
     "psp")
     savePsp
+    ;;
+
+    "dreamcast")
+    saveDreamcast
     ;;
     
     *)
