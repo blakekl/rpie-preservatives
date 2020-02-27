@@ -116,5 +116,5 @@ That's fine. The commands in the installer only add a command to run these scrip
 
 - What if I have poor internet? Can I perform this once a day or once a week instead?
 
-In this case, you really only need the `-onend.sh` script. Download it to wherevery ou like. Then, you can setup a cronjob to backup as frequently as you like. Be sure to pass in a system variable that corresponsd to the system you want backed up.
+In this case, you really only need the `-onend.sh` script. Download it to wherever you like. Then, you can setup a cronjob to backup as frequently as you need. Be sure to pass in a system variable that corresponsd to the system you want backed up.
 i.e. `psp` or `gc` or `snes` for example.
