@@ -92,8 +92,7 @@ y/e/d> y
 
 - Download the `rpie-preservatives-onend.sh` and `rpie-preservatives-onstart.sh` files and place them in `/opt/retropie/configs/all/`.
 - Be sure they are executable by running `chmod +x /opt/retropie/configs/all/rpie-preservatives*`.
-- run this in a terminal ```echo "source /opt/retropie/configs/all/rpie-preservatives-onstart.sh" >> /opt/retropie/configs/all/runcommand-onstart.sh \
-&& echo "source /opt/retropie/configs/all/rpie-preservatives-onend.sh" >> /opt/retropie/configs/all/runcommand-onend.sh```
+- run this in a terminal `echo "source /opt/retropie/configs/all/rpie-preservatives-onstart.sh" >> /opt/retropie/configs/all/runcommand-onstart.sh && echo "source /opt/retropie/configs/all/rpie-preservatives-onend.sh" >> /opt/retropie/configs/all/runcommand-onend.sh`
 - Launch any emulator and exit to create your first backup file. You can find the file from your drive root in a folder called `retropie-backup/srm_saves.tar.gz`
 
 From now on, this file will be updated any time you close a game and have made changes to your save files.
@@ -106,6 +105,8 @@ Currently, the scripts handles backing up any cores that store their saves in `.
 
 - ppsspp
 - lr-dolphin (gamecube and wii. Saves backed up separately for each system).
+- reicast
+- flycast (May not work with per-game save option enabled. I just found out about the option and haven't discovered how it works yet. Hopefully it just uses .srm files in the roms directory like most lr- cores).
 
 ## FAQ
 
