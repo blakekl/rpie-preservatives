@@ -93,9 +93,9 @@ y/e/d> y
 - Download the `rpie-preservatives-onend.sh` and `rpie-preservatives-onstart.sh` files and place them in `/opt/retropie/configs/all/`.
 - Be sure they are executable by running `chmod +x /opt/retropie/configs/all/rpie-preservatives*`.
 - run this in a terminal `echo "source /opt/retropie/configs/all/rpie-preservatives-onstart.sh" >> /opt/retropie/configs/all/runcommand-onstart.sh && echo "source /opt/retropie/configs/all/rpie-preservatives-onend.sh" >> /opt/retropie/configs/all/runcommand-onend.sh`
-- Launch any emulator and exit to create your first backup file. You can find the file from your drive root in a folder called `retropie-backup/srm_saves.tar.gz`
+- Launch any emulator and exit to create your first backup file. You can find the files from your drive root in a folder called `retropie-backup`
 
-From now on, this file will be updated any time you close a game and have made changes to your save files.
+From now on, these files will be updated any time you close a game and have made changes to your save files (Some systems skip the difference check and will upload every time).
 
 ## How it works
 
