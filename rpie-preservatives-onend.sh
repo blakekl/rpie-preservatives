@@ -45,8 +45,12 @@ saveSRMs() {
         echo "Done!"
     fi
 }
-``
-saveGeneric() {
+
+saveFilesMatching() {
+    
+}
+
+saveFolder() {
     local savesDirParent=$1
     local saveFile=$2
     local savesDir=$3
@@ -70,7 +74,7 @@ saveGamecube() {
     local savesDir="GC/"
 
     echo "Saving gamecube..."
-    saveGeneric "${savesDirParent}" "${saveFile}" "${savesDir}"
+    saveFolder "${savesDirParent}" "${saveFile}" "${savesDir}"
 }
 
 saveWii() {
@@ -78,7 +82,7 @@ saveWii() {
     local saveFile="${TMP}/wii_saves.tar.gz"
     local savesDir="Wii/"
     echo "Saving wii..."
-    saveGeneric "${savesDirParent}" "${saveFile}" "${savesDir}"
+    saveFolder "${savesDirParent}" "${saveFile}" "${savesDir}"
 }
 
 savePsp() {
@@ -86,7 +90,7 @@ savePsp() {
     local saveFile="${TMP}/psp_saves.tar.gz"
     local savesDir="SAVEDATA/"
     echo "Saving psp..."
-    saveGeneric "${savesDirParent}" "${saveFile}" "${savesDir}"
+    saveFolder "${savesDirParent}" "${saveFile}" "${savesDir}"
 }
 
 saveDreamcast() {
@@ -97,7 +101,7 @@ saveDreamcast() {
         saveFile="${TMP}/flycast_saves.tar.gz";
     fi
     local savesDir="./";
-    saveGeneric "${savesDirParent}" "${saveFile}" "${savesDir}"
+    saveFolder "${savesDirParent}" "${saveFile}" "${savesDir}"
 }
 
 case $SYSTEM in 
