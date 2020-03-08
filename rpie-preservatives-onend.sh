@@ -15,6 +15,20 @@ PLAIN="\e[39m"
 TMP="/tmp"
 RCLONE_DRIVE="retropie-backup:retropie-backup"
 
+uploadSave() {
+    local saveFile="$1"
+
+    { #try
+        rclone mkdir "$RCLONE_DRIVE" \
+        && rclone copy -P "$saveFile" "$RCLONE_DRIVE" \
+        && echo -e "\n${GREEN}***** Saves backed up successfuly! *****${PLAIN}\n"
+    } || { #catch
+        echo -e "${RED}*****  Error saving backups. Try again later. *****${PLAIN}" \
+        echo -e "${RED}*****  Error saving backups. Try again later. *****${PLAIN}" >&2 \
+        &&  sleep 2
+    }
+}
+
 saveSRMs() {
     local ROMSDir="${HOME}/RetroPie/roms"
     local CURRENT="current_rom_saves"
@@ -31,23 +45,21 @@ saveSRMs() {
         echo -e "${GREEN}No differences. Skipping backup.${PLAIN}"
     else
         echo -e "${RED}Save files are different. Backing up...\n${PLAIN}"
-        { # try
-            find -L ./ -name '*.srm' -exec tar -c {} + | gzip -n > $SAVES \
-            && rclone mkdir $RCLONE_DRIVE \
-            && rclone copy -P $SAVES $RCLONE_DRIVE \
-            && echo -e "\n${GREEN}***** Saves backed up successfully!! *****${PLAIN}\n"
-        } || { # catch
-            echo -e "${RED}*****  Error saving backups. Try again later. *****${PLAIN}" \
-            echo -e "${RED}*****  Error saving backups. Try again later. *****${PLAIN}" >&2 \
-            &&  sleep 2
-        }
+        find -L ./ -name '*.srm' -exec tar -c {} + | gzip -n > $SAVES
+        uploadSave "$SAVES"
         echo "cleaning up..." && rm $SAVES $TMP/$CURRENT $TMP/$PREVIOUS &> /dev/null
         echo "Done!"
     fi
 }
 
 saveFilesMatching() {
-    
+    local savesDirParent=$1
+    local saveFile="$TMP/$2"
+    local savePattern=$3
+    echo "Uploading $2..."
+    cd "$savesDirParent" \
+    && find -L . -regextype 'posix-extended' -regex "$savePattern" -exec tar -czf "$saveFile" {} +
+    uploadSave "$saveFile"
 }
 
 saveFolder() {
@@ -55,17 +67,9 @@ saveFolder() {
     local saveFile=$2
     local savesDir=$3
     echo "Uploading ${saveFile}..."
-    { # try
-        cd $savesDirParent \
+    cd $savesDirParent \
         && tar -czf "${saveFile}" ./ \
-        && rclone mkdir $RCLONE_DRIVE \
-        && rclone copy -P "${saveFile}" "${RCLONE_DRIVE}" \
-        && echo -e "\n${GREEN}***** Saves backed up successfully! *****${PLAIN}\n"
-    } || { # catch 
-            echo -e "${RED}*****  Error saving backups. Try again later. *****${PLAIN}" \
-            echo -e "${RED}*****  Error saving backups. Try again later. *****${PLAIN}" >&2 \
-            &&  sleep 2
-    }
+    uploadSave "$saveFile"
 }
 
 saveGamecube() {
@@ -94,14 +98,9 @@ savePsp() {
 }
 
 saveDreamcast() {
-    local savesDirParent="${HOME}/RetroPie/.reicast/";
-    local saveFile="${TMP}/reicast_saves.tar.gz";
-    if [ "$EMULATOR" = "lr-flycast" ] ; then
-        savesDirParent="${HOME}/RetroPie/BIOS/dc/";
-        saveFile="${TMP}/flycast_saves.tar.gz";
-    fi
-    local savesDir="./";
-    saveFolder "${savesDirParent}" "${saveFile}" "${savesDir}"
+    local savesDirParent="${HOME}/RetroPie/roms/dreamcast/";
+    local saveFile="flycast_saves.tar.gz";
+    saveFilesMatching "$savesDirParent" "$saveFile" ".*\.(A|B|C|D)(1|2)\.bin"
 }
 
 case $SYSTEM in 
