@@ -6,9 +6,28 @@
 # using rclone.
 #
 # Requires rclone to be installed
+# 
+# In the future, I plan on moving to single file syncing. This is a sync 
+# command that will sync the entire directory, excluding metadata, scraped
+# files, and save states.
+#
+# `rclone sync ./ retropie-backup:retropie-backup/saturn --dry-run --exclude '*.{chd,m3u,xml,state}' --exclude 'media/**'`
+# I could smartly build the exclusion filelist using the es_system.cfg file.
+#
+# `xmlstarlet sel -t -m "/systemList/system" -v "name" -o ", " -v "extension" -n /etc/emulationstation/es_systems.cfg`
+#
+# This will print each system on a line followed by a line of space separated 
+# extensions the system uses. Then I just need to add '.state' and '.xml' to it
+# to exclude save states and gamelist.xml files.
+# 
+# `xmlstarlet sel -t -m "/systemList/system"  -v "extension" -n /etc/emulationstation/es_systems.cfg | sed "s/.//" | sed "s/ ./,/g" | sed "s/^/.{/" | sed "s/$/}/"`
+# prints a list string of the exclusion string for all the identified
+# extensions for a system from the es_systems.cfg file.
 ###############################################################################
 SYSTEM=$1
 EMULATOR=$2
+ROM_PATH=$3
+FULL_COMMAND=$4
 GREEN="\e[92m"
 RED="\e[91m"
 PLAIN="\e[39m"
@@ -103,6 +122,12 @@ saveDreamcast() {
     saveFilesMatching "$savesDirParent" "$saveFile" ".*\.(A|B|C|D)(1|2)\.bin"
 }
 
+saveNds() {
+    local savesDirParent="${HOME}/RetroPie/roms/nds/";
+    local saveFile="nds_saves.tar.gz";
+    saveFilesMatching "$savesDirParent" "$saveFile" ".*\.dsv"
+}
+
 case $SYSTEM in 
     "gc")
     saveGamecube
@@ -119,7 +144,11 @@ case $SYSTEM in
     "dreamcast")
     saveDreamcast
     ;;
-    
+
+    "nds")
+    saveNds
+    ;;
+
     *)
     saveSRMs
     ;;
