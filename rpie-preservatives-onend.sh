@@ -1,28 +1,10 @@
 #!/usr/bin/env bash
 ###############################################################################
-# This is a script backup all save files when using retropie. It compares the 
-# save file names/timestamps when an emulator is launched to when it is closed.
-# If there are changes, it compresses the saves and uploads them cloud storage
-# using rclone.
+# This is a script backup all save files when using retropie. It syncs the
+# local save files to the remote using rclone.
 #
 # Requires rclone to be installed
-# 
-# In the future, I plan on moving to single file syncing. This is a sync 
-# command that will sync the entire directory, excluding metadata, scraped
-# files, and save states.
-#
-# `rclone sync ./ retropie-backup:retropie-backup/saturn --dry-run --exclude '*.{chd,m3u,xml,state}' --exclude 'media/**'`
-# I could smartly build the exclusion filelist using the es_system.cfg file.
-#
-# `xmlstarlet sel -t -m "/systemList/system" -v "name" -o ", " -v "extension" -n /etc/emulationstation/es_systems.cfg`
-#
-# This will print each system on a line followed by a line of space separated 
-# extensions the system uses. Then I just need to add '.state' and '.xml' to it
-# to exclude save states and gamelist.xml files.
-# 
-# `xmlstarlet sel -t -m "/systemList/system"  -v "extension" -n /etc/emulationstation/es_systems.cfg | sed "s/.//" | sed "s/ ./,/g" | sed "s/^/.{/" | sed "s/$/}/"`
-# prints a list string of the exclusion string for all the identified
-# extensions for a system from the es_systems.cfg file.
+# Requires xmlstarlet to be installed
 ###############################################################################
 SYSTEM=$1
 EMULATOR=$2
@@ -34,9 +16,29 @@ PLAIN="\e[39m"
 TMP="/tmp"
 RCLONE_DRIVE="retropie-backup:retropie-backup"
 
+getSystemsExtensionExclusions() {
+    mapfile -t < <( xmlstarlet sel -t -m "/systemList/system"  -v "name" -n /etc/emulationstation/es_systems.cfg )
+    SYSTEMS=("${MAPFILE[@]}")
+
+    mapfile -t < <( xmlstarlet sel -t -m "/systemList/system"  -v "extension" -n /etc/emulationstation/es_systems.cfg | sed "s/.//" | sed "s/ ./,/g" | sed "s/^/*.{/" | sed "s/$/}/" )
+    GAME_EXTENSIONS=("${MAPFILE[@]}")
+
+    for i in "${!SYSTEMS[@]}"; do
+        if [ "${SYSTEMS[$i]}" = "$SYSTEM" ]; then
+           SYSTEM_INDEX="$i"
+        fi
+    done
+}
+
+normalSync() {
+    local ROMSDir="${HOME}/RetroPie/roms"
+    local EXCLUDE="${GAME_EXTENSIONS[$SYSTEM_INDEX]}"
+    echo "Saving $SYSTEM save files..."
+    rclone sync "$ROMSDir/$SYSTEM" "$RCLONE_DRIVE/$SYSTEM" -P --exclude "*.{state*,xml,txt,chd,DS_Store,oops,0*}" --exclude "media/**" --exclude "Mupen64plus/**"  --exclude "$EXCLUDE"
+}
+
 uploadSave() {
     local saveFile="$1"
-
     { #try
         rclone mkdir "$RCLONE_DRIVE" \
         && rclone copy -P "$saveFile" "$RCLONE_DRIVE" \
@@ -46,39 +48,6 @@ uploadSave() {
         echo -e "${RED}*****  Error saving backups. Try again later. *****${PLAIN}" >&2 \
         &&  sleep 2
     }
-}
-
-saveSRMs() {
-    local ROMSDir="${HOME}/RetroPie/roms"
-    local CURRENT="current_rom_saves"
-    local PREVIOUS="previous_rom_saves"
-    local SAVES="${TMP}/srm_saves.tar.gz"
-
-    echo "Saving srms..."
-    cd $ROMSDir && find -L ./ -name "*.srm" -printf "%f\t%T@\n" | sort > $TMP/$CURRENT
-    diff -q $TMP/$PREVIOUS $TMP/$CURRENT &> /dev/null
-    isChanged=$?
-
-    if [[ $isChanged == 0 ]]
-    then
-        echo -e "${GREEN}No differences. Skipping backup.${PLAIN}"
-    else
-        echo -e "${RED}Save files are different. Backing up...\n${PLAIN}"
-        find -L ./ -name '*.srm' -exec tar -c {} + | gzip -n > $SAVES
-        uploadSave "$SAVES"
-        echo "cleaning up..." && rm $SAVES $TMP/$CURRENT $TMP/$PREVIOUS &> /dev/null
-        echo "Done!"
-    fi
-}
-
-saveFilesMatching() {
-    local savesDirParent=$1
-    local saveFile="$TMP/$2"
-    local savePattern=$3
-    echo "Uploading $2..."
-    cd "$savesDirParent" \
-    && find -L . -regextype 'posix-extended' -regex "$savePattern" -exec tar -czf "$saveFile" {} +
-    uploadSave "$saveFile"
 }
 
 saveFolder() {
@@ -116,17 +85,7 @@ savePsp() {
     saveFolder "${savesDirParent}" "${saveFile}" "${savesDir}"
 }
 
-saveDreamcast() {
-    local savesDirParent="${HOME}/RetroPie/roms/dreamcast/";
-    local saveFile="flycast_saves.tar.gz";
-    saveFilesMatching "$savesDirParent" "$saveFile" ".*\.(A|B|C|D)(1|2)\.bin"
-}
-
-saveNds() {
-    local savesDirParent="${HOME}/RetroPie/roms/nds/";
-    local saveFile="nds_saves.tar.gz";
-    saveFilesMatching "$savesDirParent" "$saveFile" ".*\.dsv"
-}
+getSystemsExtensionExclusions
 
 case $SYSTEM in 
     "gc")
@@ -141,15 +100,7 @@ case $SYSTEM in
     savePsp
     ;;
 
-    "dreamcast")
-    saveDreamcast
-    ;;
-
-    "nds")
-    saveNds
-    ;;
-
     *)
-    saveSRMs
+    normalSync
     ;;
 esac

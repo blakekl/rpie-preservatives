@@ -3,3 +3,4 @@ emulationstation
 retroarch-joypads
 retroarch
 *.bak
+*.swp
