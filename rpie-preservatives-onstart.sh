@@ -1,40 +1,63 @@
 #!/usr/bin/env bash
 ###############################################################################
-# This is a script backup all save files when using retropie. It compares the 
-# save file names/timestamps when an emulator is launched to when it is closed.
-# If there are changes, it compresses the saves and uploads them cloud storage
-# using rclone.
+# This is a script backup all save files when using retropie. It syncs the
+# local save files to the remote using rclone.
 #
 # Requires rclone to be installed
+# Requires xmlstarlet to be installed
 ###############################################################################
 SYSTEM=$1
 EMULATOR=$2
-GREEN='\033[0;32m'
-RED='\033[0;31m'
-PLAIN='\033[0m'
-ROMSDir="/home/blake/RetroPie/roms"
+ROM_PATH=$3
+FULL_COMMAND=$4
+GREEN="\e[92m"
+RED="\e[91m"
+PLAIN="\e[39m"
 TMP="/tmp"
+RCLONE_DRIVE="retropie-backup:retropie-backup"
 
-createCompareFile() {
-    CURRENT="current_rom_saves"
-    PREVIOUS="previous_rom_saves"
-    SAVES="${TMP}/rom_saves.tar.gz"
+getSystemsExtensionExclusions() {
+    mapfile -t < <( xmlstarlet sel -t -m "/systemList/system"  -v "name" -n /etc/emulationstation/es_systems.cfg )
+    SYSTEMS=("${MAPFILE[@]}")
 
-    cd $ROMSDir && find -L ./ -name "*.srm" -printf "%f\t%T@\n" | sort > $TMP/$PREVIOUS
+    mapfile -t < <( xmlstarlet sel -t -m "/systemList/system"  -v "extension" -n /etc/emulationstation/es_systems.cfg | sed "s/.//" | sed "s/ ./,/g" | sed "s/^/*.{/" | sed "s/$/}/" )
+    GAME_EXTENSIONS=("${MAPFILE[@]}")
+
+    for i in "${!SYSTEMS[@]}"; do
+        if [ "${SYSTEMS[$i]}" = "$SYSTEM" ]; then
+           SYSTEM_INDEX="$i"
+        fi
+    done
 }
 
-case $SYSTEM in
+normalSync() {
+    local ROMSDir="${HOME}/RetroPie/roms"
+    local EXCLUDE="${GAME_EXTENSIONS[$SYSTEM_INDEX]}"
+    echo "Downloading $SYSTEM save files..."
+    echo ""
+    rclone sync "$RCLONE_DRIVE/$SYSTEM" "$ROMSDir/$SYSTEM" -P --exclude "*.{state*,xml,txt,chd,DS_Store,oops,0*}" --exclude "media/**" --exclude "mame*/**" --exclude "**sd.raw"  --exclude "Mupen64plus/**"  --exclude "$EXCLUDE"
+}
 
-    "gc")
-    ;;
-
-    "wii")
-    ;;
-
-    "psp")
-    ;;
-
+case $SYSTEM in 
+    mame)
+        ;&
+    arcade)
+        ;&
+    fba)
+        ;&
+    mame-advmame)
+        ;&
+    mame-libretro)
+        ;&
+    mame-mame4all)
+        ;&
+    mame2016)
+        echo "No saves for arcade machines. Exiting."
+        sleep 2
+        ;;
     *)
-    createCompareFile
-    ;;
+        echo "Building exclusion list..."
+        getSystemsExtensionExclusions
+        normalSync
+        ;;
 esac
