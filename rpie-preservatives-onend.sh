@@ -34,73 +34,30 @@ normalSync() {
     local ROMSDir="${HOME}/RetroPie/roms"
     local EXCLUDE="${GAME_EXTENSIONS[$SYSTEM_INDEX]}"
     echo "Saving $SYSTEM save files..."
-    rclone sync "$ROMSDir/$SYSTEM" "$RCLONE_DRIVE/$SYSTEM" -P --exclude "*.{state*,xml,txt,chd,DS_Store,oops,0*}" --exclude "media/**" --exclude "Mupen64plus/**"  --exclude "$EXCLUDE"
+    echo ""
+    rclone sync "$ROMSDir/$SYSTEM" "$RCLONE_DRIVE/$SYSTEM" -P --exclude "*.{state*,xml,txt,chd,DS_Store,oops,0*}" --exclude "media/**" --exclude "mame*/**" --exclude "**sd.raw"  --exclude "Mupen64plus/**"  --exclude "$EXCLUDE"
 }
-
-uploadSave() {
-    local saveFile="$1"
-    { #try
-        rclone mkdir "$RCLONE_DRIVE" \
-        && rclone copy -P "$saveFile" "$RCLONE_DRIVE" \
-        && echo -e "\n${GREEN}***** Saves backed up successfuly! *****${PLAIN}\n"
-    } || { #catch
-        echo -e "${RED}*****  Error saving backups. Try again later. *****${PLAIN}" \
-        echo -e "${RED}*****  Error saving backups. Try again later. *****${PLAIN}" >&2 \
-        &&  sleep 2
-    }
-}
-
-saveFolder() {
-    local savesDirParent=$1
-    local saveFile=$2
-    local savesDir=$3
-    echo "Uploading ${saveFile}..."
-    cd $savesDirParent \
-        && tar -czf "${saveFile}" ./ \
-    uploadSave "$saveFile"
-}
-
-saveGamecube() {
-    local savesDirParent="${HOME}/RetroPie/roms/gc/User/"
-    local saveFile="${TMP}/gc_saves.tar.gz"
-    local savesDir="GC/"
-
-    echo "Saving gamecube..."
-    saveFolder "${savesDirParent}" "${saveFile}" "${savesDir}"
-}
-
-saveWii() {
-    local savesDirParent="${HOME}/RetroPie/roms/wii/User/"
-    local saveFile="${TMP}/wii_saves.tar.gz"
-    local savesDir="Wii/"
-    echo "Saving wii..."
-    saveFolder "${savesDirParent}" "${saveFile}" "${savesDir}"
-}
-
-savePsp() {
-    local savesDirParent="${HOME}/RetroPie/roms/psp/PSP/"
-    local saveFile="${TMP}/psp_saves.tar.gz"
-    local savesDir="SAVEDATA/"
-    echo "Saving psp..."
-    saveFolder "${savesDirParent}" "${saveFile}" "${savesDir}"
-}
-
-getSystemsExtensionExclusions
 
 case $SYSTEM in 
-    "gc")
-    saveGamecube
-    ;;
-
-    "wii")
-    saveWii
-    ;;
-
-    "psp")
-    savePsp
-    ;;
-
+    mame)
+        ;&
+    arcade)
+        ;&
+    fba)
+        ;&
+    mame-advmame)
+        ;&
+    mame-libretro)
+        ;&
+    mame-mame4all)
+        ;&
+    mame2016)
+        echo "No saves for arcade machines. Exiting."
+        sleep 2
+        ;;
     *)
-    normalSync
-    ;;
+        echo "Building exclusion list..."
+        getSystemsExtensionExclusions
+        normalSync
+        ;;
 esac
