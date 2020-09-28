@@ -1,10 +1,23 @@
 #!/usr/bin/env bash
 ###############################################################################
-# This is a script backup all save files when using retropie. It syncs the
-# local save files to the remote using rclone.
+# This is a script to download all save files when using retropie. It syncs the
+# remote save files to the local file system using rclone.
 #
 # Requires rclone to be installed
 # Requires xmlstarlet to be installed
+###############################################################################
+
+###############################################################################
+# This is the variable that is your backup on the remote. No changes are
+# necessary if you followed the instructions in the readme and setup your 
+# rclone remote with these names. Otherwise, you'll need to proved a new value
+# here to whatever you named your drive.
+###############################################################################
+RCLONE_DRIVE="retropie-backup:retropie-backup"
+
+###############################################################################
+# This is the rest of the script that performs the actual work. Do not modiy
+# anything below this.
 ###############################################################################
 SYSTEM=$1
 EMULATOR=$2
@@ -13,9 +26,12 @@ FULL_COMMAND=$4
 GREEN="\e[92m"
 RED="\e[91m"
 PLAIN="\e[39m"
-TMP="/tmp"
-RCLONE_DRIVE="retropie-backup:retropie-backup"
 
+###############################################################################
+# Scans the /etc/emulationstation/es_systems.cfg file to find the extensions of
+# rom files. This data is then used to build an exclusion list, so we don't
+# end up syncing entire rom files by mistake.
+###############################################################################
 getSystemsExtensionExclusions() {
     mapfile -t < <( xmlstarlet sel -t -m "/systemList/system"  -v "name" -n /etc/emulationstation/es_systems.cfg )
     SYSTEMS=("${MAPFILE[@]}")
@@ -30,14 +46,29 @@ getSystemsExtensionExclusions() {
     done
 }
 
-normalSync() {
-    local ROMSDir="${HOME}/RetroPie/roms"
+###############################################################################
+# uses rclone to sync the remote directory with the local file system for the
+# system we are running. 
+###############################################################################
+sync() {
+    local ROMS_DIR="${HOME}/RetroPie/roms"
     local EXCLUDE="${GAME_EXTENSIONS[$SYSTEM_INDEX]}"
     echo "Downloading $SYSTEM save files..."
     echo ""
-    rclone sync "$RCLONE_DRIVE/$SYSTEM" "$ROMSDir/$SYSTEM" -P --exclude "*.{state*,xml,txt,chd,DS_Store,oops,0*}" --exclude "media/**" --exclude "mame*/**" --exclude "**sd.raw"  --exclude "Mupen64plus/**"  --exclude "$EXCLUDE"
+    rclone sync "$RCLONE_DRIVE/$SYSTEM" "$ROMS_DIR/$SYSTEM" -P \
+        --exclude "*.{state*,xml,txt,chd,DS_Store,oops,0*}" \
+        --exclude "media/**" \
+        --exclude "mame*/**" \
+        --exclude "**sd.raw" \
+        --exclude "Mupen64plus/**"  \
+        --exclude "$EXCLUDE"
 }
 
+###############################################################################
+# Skips syncing on systems that don't support it (mostly mame). This function
+# is not complete, as I don't have roms for all the systems supported by
+# retroarch, and I don't plan on emulating them all either.
+###############################################################################
 case $SYSTEM in 
     mame)
         ;&
@@ -58,6 +89,6 @@ case $SYSTEM in
     *)
         echo "Building exclusion list..."
         getSystemsExtensionExclusions
-        normalSync
+        sync
         ;;
 esac
