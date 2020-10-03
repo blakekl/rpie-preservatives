@@ -78,6 +78,10 @@ syncIfValidSystem() {
             echo "No saves for arcade machines. Exiting."
             sleep 2
             ;;
+        retropie)
+            echo "skipping retropie directory"
+            sleep 2
+            ;;
         *)
             sync
             ;;
@@ -103,6 +107,7 @@ if [ $# -eq 0 ]; then
     echo "Backing up..."
     for i in "${!SYSTEMS[@]}"; do
         SYSTEM_INDEX="$i"
+        SYSTEM="${SYSTEMS[$i]}"
         echo "  Uploading ${SYSTEMS[$i]}"
         syncIfValidSystem
     done
