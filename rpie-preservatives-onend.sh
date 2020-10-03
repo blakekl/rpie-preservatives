@@ -22,6 +22,7 @@ RCLONE_DRIVE="retropie-backup:retropie-backup"
 # end up syncing entire rom files by mistake.
 ###############################################################################
 getSystemsExtensionExclusions() {
+echo "Building exclusion list..."
     mapfile -t < <( xmlstarlet sel -t -m "/systemList/system"  -v "name" -n /etc/emulationstation/es_systems.cfg )
     SYSTEMS=("${MAPFILE[@]}")
 
@@ -45,7 +46,7 @@ sync() {
     echo "Saving $SYSTEM save files..."
     echo ""
     rclone sync "$ROMS_DIR/$SYSTEM" "$RCLONE_DRIVE/$SYSTEM" -P \
-        --exclude "*.{state*,xml,txt,chd,DS_Store,oops,0*}" \
+        --exclude "*.{state*,xml,txt,chd,ips,ups,bps,DS_Store,oops,0*}" \
         --exclude "media/**" \
         --exclude "mame*/**" \
         --exclude "**sd.raw" \
@@ -54,30 +55,58 @@ sync() {
 }
 
 ###############################################################################
+# Checks whether a system is calid to sync or not. If valid, syncs the system.
 # Skips syncing on systems that don't support it (mostly mame). This function
 # is not complete, as I don't have roms for all the systems supported by
 # retroarch, and I don't plan on emulating them all either.
 ###############################################################################
-case $SYSTEM in 
-    mame)
-        ;&
-    arcade)
-        ;&
-    fba)
-        ;&
-    mame-advmame)
-        ;&
-    mame-libretro)
-        ;&
-    mame-mame4all)
-        ;&
-    mame2016)
-        echo "No saves for arcade machines. Exiting."
-        sleep 2
-        ;;
-    *)
-        echo "Building exclusion list..."
-        getSystemsExtensionExclusions
-        sync
-        ;;
-esac
+syncIfValidSystem() {
+    case $SYSTEM in 
+        mame)
+            ;&
+        arcade)
+            ;&
+        fba)
+            ;&
+        mame-advmame)
+            ;&
+        mame-libretro)
+            ;&
+        mame-mame4all)
+            ;&
+        mame2016)
+            echo "No saves for arcade machines. Exiting."
+            sleep 2
+            ;;
+        *)
+            sync
+            ;;
+    esac
+}
+
+getSystemsExtensionExclusions
+
+if [ $# -eq 0 ]; then
+    # no system input. Sync all systems.
+    echo "No system passed in. Backing p all saves. (Ctl-C to abort)"
+    echo "5"
+    sleep 1
+    echo "4"
+    sleep 1
+    echo "3"
+    sleep 1
+    echo "2"
+    sleep 1
+    echo "1"
+    sleep 1
+    echo "0"
+    echo "Backing up..."
+    for i in "${!SYSTEMS[@]}"; do
+        SYSTEM_INDEX="$i"
+        echo "  Uploading ${SYSTEMS[$i]}"
+        syncIfValidSystem
+    done
+else
+    syncIfValidSystem
+fi
+

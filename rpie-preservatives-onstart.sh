@@ -56,7 +56,7 @@ sync() {
     echo "Downloading $SYSTEM save files..."
     echo ""
     rclone sync "$RCLONE_DRIVE/$SYSTEM" "$ROMS_DIR/$SYSTEM" -P \
-        --exclude "*.{state*,xml,txt,chd,DS_Store,oops,0*}" \
+        --exclude "*.{state*,xml,txt,chd,ips,ups,bps,DS_Store,oops,0*}" \
         --exclude "media/**" \
         --exclude "mame*/**" \
         --exclude "**sd.raw" \
