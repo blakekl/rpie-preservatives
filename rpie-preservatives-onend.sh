@@ -1,10 +1,23 @@
 #!/usr/bin/env bash
 ###############################################################################
-# This is a script backup all save files when using retropie. It syncs the
+# This is a script to backup all save files when using retropie. It syncs the
 # local save files to the remote using rclone.
 #
 # Requires rclone to be installed
 # Requires xmlstarlet to be installed
+###############################################################################
+
+###############################################################################
+# This is the variable that is your backup on the remote. No changes are
+# necessary if you followed the instructions in the readme and setup your 
+# rclone remote with these names. Otherwise, you'll need to proved a new value
+# here to whatever you named your drive.
+###############################################################################
+RCLONE_DRIVE="retropie-backup:retropie-backup"
+
+###############################################################################
+# This is the rest of the script that performs the actual work. Do not modiy
+# anything below this unless you know what you're doing.
 ###############################################################################
 SYSTEM=$1
 EMULATOR=$2
@@ -13,16 +26,13 @@ FULL_COMMAND=$4
 GREEN="\e[92m"
 RED="\e[91m"
 PLAIN="\e[39m"
-TMP="/tmp"
-RCLONE_DRIVE="retropie-backup:retropie-backup"
 
 ###############################################################################
 # Scans the /etc/emulationstation/es_systems.cfg file to find the extensions of
 # rom files. This data is then used to build an exclusion list, so we don't
-# end up syncing entire rom files by mistake.
+# end up syncing large rom files by mistake.
 ###############################################################################
 getSystemsExtensionExclusions() {
-echo "Building exclusion list..."
     mapfile -t < <( xmlstarlet sel -t -m "/systemList/system"  -v "name" -n /etc/emulationstation/es_systems.cfg )
     SYSTEMS=("${MAPFILE[@]}")
 
@@ -104,7 +114,7 @@ if [ $# -eq 0 ]; then
     echo "1"
     sleep 1
     echo "0"
-    echo "Backing up..."
+    echo "*** Executing ***"
     for i in "${!SYSTEMS[@]}"; do
         SYSTEM_INDEX="$i"
         SYSTEM="${SYSTEMS[$i]}"
