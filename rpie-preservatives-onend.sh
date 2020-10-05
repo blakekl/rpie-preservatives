@@ -41,11 +41,11 @@ echo "Building exclusion list..."
 # system we are running. 
 ###############################################################################
 sync() {
-    local ROMS_DIR="${HOME}/RetroPie/roms"
+    local ROMS_DIR="${HOME}/RetroPie/roms/${SYSTEM}"
     local EXCLUDE="${GAME_EXTENSIONS[$SYSTEM_INDEX]}"
-    echo "Saving $SYSTEM save files..."
     echo ""
-    rclone sync "$ROMS_DIR/$SYSTEM" "$RCLONE_DRIVE/$SYSTEM" -P \
+    echo "  Syncing $SYSTEM save files..."
+    rclone sync "$ROMS_DIR" "$RCLONE_DRIVE/$SYSTEM" -P \
         --exclude "*.{state*,xml,txt,chd,ips,ups,bps,DS_Store,oops,0*}" \
         --exclude "media/**" \
         --exclude "mame*/**" \
@@ -75,7 +75,7 @@ syncIfValidSystem() {
         mame-mame4all)
             ;&
         mame2016)
-            echo "No saves for arcade machines. Exiting."
+            echo "No saves for arcade machines. Skipping."
             sleep 2
             ;;
         retropie)
@@ -92,7 +92,7 @@ getSystemsExtensionExclusions
 
 if [ $# -eq 0 ]; then
     # no system input. Sync all systems.
-    echo "No system passed in. Backing p all saves. (Ctl-C to abort)"
+    echo "No system passed in. Uploading all saves. (Ctl-C to abort)"
     echo "5"
     sleep 1
     echo "4"
@@ -108,7 +108,6 @@ if [ $# -eq 0 ]; then
     for i in "${!SYSTEMS[@]}"; do
         SYSTEM_INDEX="$i"
         SYSTEM="${SYSTEMS[$i]}"
-        echo "  Uploading ${SYSTEMS[$i]}"
         syncIfValidSystem
     done
 else
