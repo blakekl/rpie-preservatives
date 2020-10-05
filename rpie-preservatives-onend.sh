@@ -61,6 +61,10 @@ sync() {
         --exclude "mame*/**" \
         --exclude "**sd.raw" \
         --exclude "Mupen64plus/**" \
+        --exclude "User/Cache**" \
+        --exclude "User/Config**" \
+        --exclude "User/Logs**" \
+        --exclude "PSP/SYSTEM/**" \
         --exclude "$EXCLUDE"
 }
 
