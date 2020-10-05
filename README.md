@@ -1,16 +1,35 @@
 # rpie-preservatives
 
+## Table of Contents
+
+- [rpie-preservatives](#rpie-preservatives)
+  - [Table of Contents](#table-of-contents)
+  - [Installation](#installation)
+    - [Install Dependencies](#install-dependencies)
+      - [xmlstarlet:](#xmlstarlet)
+      - [rclone:](#rclone)
+    - [Install rpie-preservatives](#install-rpie-preservatives)
+  - [How it works](#how-it-works)
+    - [excluded files](#excluded-files)
+  - [FAQ](#faq)
+
 ## Installation
 
 ### Install Dependencies
+
+#### xmlstarlet:
+
+`sudo apt-get install xmlstarlet`
+
+#### rclone:
 
 Follow the steps on [rclone.org](https://rclone.org/downloads/) if the below doesn't work.
 
 `curl https://rclone.org/install.sh | sudo bash`
 
-Next you'll need to run `rclone config` to setup you're interface to the cloud storage system.
+Next you'll need to run `rclone config` to setup you're interface to the remote storage system.
 
-- **Be sure to name your remote `retropie-backup`**
+- **<span style="color: red">Be sure to name your remote</span>** `retropie-backup`
 
 The below example is for setting up google drive.
 
@@ -86,35 +105,52 @@ d) Delete this remote
 y/e/d> y
 ```
 
-**Important**: when setting up rclone, be sure to name the remote `retropie-backup`. I also reccommend using the `drive.file` permission so that rclone doesn't have access to all your cloud files, but this is up to you.
+**Important**: when setting up rclone, be sure to name the remote `retropie-backup`. I also reccommend using the `drive.file` permission so that rclone doesn't have access to all your remote files, but this is up to you.
 
 ### Install rpie-preservatives
 
-- Download the `rpie-preservatives-onend.sh` and `rpie-preservatives-onstart.sh` files and place them in `/opt/retropie/configs/all/`.
+- Download the `rpie-preservatives-onend.sh` and `rpie-preservatives-onstart.sh` files from [releases](https://github.com/blakekl/rpie-preservatives/releases) and place them in `/opt/retropie/configs/all/`.
 - Be sure they are executable by running `chmod +x /opt/retropie/configs/all/rpie-preservatives*`.
-- run this in a terminal `echo "source /opt/retropie/configs/all/rpie-preservatives-onstart.sh" >> /opt/retropie/configs/all/runcommand-onstart.sh && echo "source /opt/retropie/configs/all/rpie-preservatives-onend.sh" >> /opt/retropie/configs/all/runcommand-onend.sh`
-- Launch any emulator and exit to create your first backup file. You can find the files from your drive root in a folder called `retropie-backup`
+- execute the following in a terminal to create your first backup of your saved games `/opt/retropie/configs/all/rpie-preservatives-onend.sh`
+  - <span style="color: red">DO NOT SKIP THIS STEP.</span> If you do, you may lose all your saved games.
+- Finally, setup rpie-preservatives to run with runcommand by typing this in a terminal `echo "source /opt/retropie/configs/all/rpie-preservatives-onstart.sh" >> /opt/retropie/configs/all/runcommand-onstart.sh && echo "source /opt/retropie/configs/all/rpie-preservatives-onend.sh" >> /opt/retropie/configs/all/runcommand-onend.sh`
 
-From now on, these files will be updated any time you close a game and have made changes to your save files (Some systems skip the difference check and will upload every time).
+From now on, your saves for any given system will be synced every time you run a game for that system.
 
 ## How it works
 
-rpie-preservatives works by comparing the modification timestamps of all your save files when a game is launched and whene it is closed. If there is a difference, it creates the `.tar.gz` file with the modified timestamp data removed. It then uses rclone to upload to your cloud storage. Rclone performs a hash check before uploading to ensure the files are different. If the files are the same, then no upload will occur.
+rpie-preservatives works by processing your es_systems config file to find files that are rom files in your system. It then syncs to rclone excluding the files with extensions it found in es_systems.cfg. It also has a few other files it specifically excludes. You can see them in the list below.
 
-Currently, the scripts handles backing up any cores that store their saves in `.srm` files. It also supports the following cores that do not store saves in `.srm` files.
+When you run a game through emulationstation, it calls runcommand with a system argument, which in turn calls rpie-preservatives. rpie-preservatives will first sync saved games from the remote to your local file system before launching the game. Once you quit the game, it will then sync any changed files back up to the remote storage. This allows you to run retropie on multiple devices and keep your progress synced across those devices.
 
-- ppsspp
-- lr-dolphin (gamecube and wii. Saves backed up separately for each system).
-- reicast
-- flycast (May not work with per-game save option enabled. I just found out about the option and haven't discovered how it works yet. Hopefully it just uses .srm files in the roms directory like most lr- cores).
+### excluded files
+
+- save state files
+  - .state
+  - .oops
+  - .0\*
+- scraped info
+  - media/\*\*
+  - .xml
+- translation patch files
+  - .ips
+  - .ups
+  - .bps
+- emulator specific files
+  - mame\*/\*\*
+  - \*\*sd.raw
+  - Mupen64plus/\*\*
+- others
+  - .chd (If you're using chd, you also are probably using .m3u files, so .chd is missing from es_systems.cfg on purpose. If you aren't using .m3u with .chd, you really should be);
+
+If your system does not match these, either update your file system to match this, or modify the scripts to exclude files differently as needed. It's probably easier to modify your file system unless you have programming experience. Even then, if you want to update to later versions of the script, having a matching filesystem will make things easier. I use Skraper beta to scrape with, and this is the default output for scraped data. It's a fantastic skraper. Check it out if you haven't used it yet at [https://www.skraper.net](https://www.skraper.net)
 
 ## FAQ
 
 - What if I already utilize runcommand for other things?
 
-That's fine. The commands in the installer only add a command to run these scripts as part of the runcommand scripts. It will not replace anything else in the scripts.
+  - That's fine. The commands in the installer only add a command to run these scripts as part of the runcommand scripts. It will not replace anything else in the scripts.
 
 - What if I have poor internet? Can I perform this once a day or once a week instead?
 
-In this case, you really only need the `-onend.sh` script. Download it to wherever you like. Then, you can setup a cronjob to backup as frequently as you need. Be sure to pass in a system variable that corresponsd to the system you want backed up.
-i.e. `psp` or `gc` or `snes` for example.
+  - In this case, you really only need the `-onend.sh` script. Download it to wherever you like. Then, you can setup a cronjob to backup as frequently as you need. If you call it without any arguments, it will backup all saves for all systems. Here is an example cron config that will upload saves daily at midnight. `0 0 * * * /opt/retropie/configs/all/rpie-preservatives-onend.sh`
