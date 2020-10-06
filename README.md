@@ -153,12 +153,13 @@ y/e/d> y
 
 ### Install rpie-preservatives
 
-- Download the `rpie-preservatives-onend.sh` and `rpie-preservatives-onstart.sh` files from [releases](https://github.com/blakekl/rpie-preservatives/releases) and place them in `/opt/retropie/configs/all/`.
-- Be sure they are executable by running `chmod +x /opt/retropie/configs/all/rpie-preservatives*`.
-- execute the following in a terminal to create your first backup of your saved games `/opt/retropie/configs/all/rpie-preservatives-onend.sh`
-  - <span style="color: red">DO NOT SKIP THIS STEP.</span> If you do, you may lose all your saved games.
-  - It's a good idea to check your remote store manually at this point to ensure your current save data is stored as you expect. Whatever you see on the remote will become your local file system the next time you run a game through emulationstation once you complete the installation.
-- Finally, setup rpie-preservatives to run with runcommand by typing this in a terminal `echo "source /opt/retropie/configs/all/rpie-preservatives-onstart.sh" >> /opt/retropie/configs/all/runcommand-onstart.sh && echo "source /opt/retropie/configs/all/rpie-preservatives-onend.sh" >> /opt/retropie/configs/all/runcommand-onend.sh`
+- Download the `rpie-preservatives.sh` script and place it in `/opt/retropie/configs/all/`
+- run the following in a terminal ```sudo chmod +x /opt/retropie/configs/all/rpie-preservatievs.sh && \
+  echo './rpie-preservatives.sh upload $1 $2 $3 $4` >> /opt/retropie/configs/all/runcommand-onend.sh' && \
+  echo './rpie-preservatives.sh download $1 $2 $3 $4` >> /opt/retropie/configs/all/runcommand-onstart.sh' && \
+  /opt/retropie/configs/all/rpie-preservatives.sh upload```
+  - This creates your first backup on the remote and sets up rpie-preservatives to run when launching and quitting a game. It will download all the saves for a system when starting a game and uploade them when quitting.
+- Check your remote store manually at this point to ensure your current save data is stored as you expect. Whatever you see on the remote will become your local file system the next time you run a game through emulationstation once you complete the installation.
 
 From now on, your saves for any given system will be synced every time you run a game for that system.
 
@@ -169,8 +170,11 @@ It would be a good idea to try a system and game that has no saved data first to
 - What if I already utilize runcommand for other things?
   - That's fine. The commands in the installer only add a command to run these scripts as part of the runcommand scripts. It will not replace anything else in the scripts.
 - What if I have poor internet? Can I perform this once a day or once a week instead?
-  - In this case, you really only need the `-onend.sh` script. Download it to wherever you like. Then, you can setup a cronjob to backup as frequently as you need. If you call it without any arguments, it will backup all saves for all systems. Here is an example cron config that will upload saves daily at midnight. `0 0 * * * /opt/retropie/configs/all/rpie-preservatives-onend.sh`
+  - In this case you can setup a cronjob to backup as frequently as you need. Call it with the upload command and no system and it will backup all systems. Here is an example cron config that will upload saves daily at midnight. `0 0 * * * /opt/retropie/configs/all/rpie-preservatives.sh upload`
 - System 'X' doesn't work
   - I've been using this for a while now and it works with all the systems I run. That being said, I don't run all the systems. If there is indeed a problem, report an issue and please provide an example of your files from `~/Retropie/roms/{system}` folder and the relevant tags from `/etc/emulationstation/es_systes.cfg`.
 - You \*\*\*\*, I've lost all my save files!
   - rpie-preservatives performs synchronization operations across your file system and the remote storage YOU configured. Data loss is a real possibility, if you do not configure things correctly. Be sure to backup your files and follow ALL directions carefully to prevent data loss.
+- I was playing the same game at the same time on two devices and my saves didn't store correctly.
+  - This does sync save files, but it can only handle one game at a time. Do not play the same game at the same time and expect both saves to exist. The one you quit last is the one that will be used.
+
