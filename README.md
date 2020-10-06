@@ -154,10 +154,13 @@ y/e/d> y
 ### Install rpie-preservatives
 
 - Download the `rpie-preservatives.sh` script and place it in `/opt/retropie/configs/all/`
-- run the following in a terminal ```sudo chmod +x /opt/retropie/configs/all/rpie-preservatievs.sh && \
+- run the following in a terminal
+  ```
+  sudo chmod +x /opt/retropie/configs/all/rpie-preservatievs.sh && \
   echo './rpie-preservatives.sh upload $1 $2 $3 $4` >> /opt/retropie/configs/all/runcommand-onend.sh' && \
   echo './rpie-preservatives.sh download $1 $2 $3 $4` >> /opt/retropie/configs/all/runcommand-onstart.sh' && \
-  /opt/retropie/configs/all/rpie-preservatives.sh upload```
+  /opt/retropie/configs/all/rpie-preservatives.sh upload
+  ```
   - This creates your first backup on the remote and sets up rpie-preservatives to run when launching and quitting a game. It will download all the saves for a system when starting a game and uploade them when quitting.
 - Check your remote store manually at this point to ensure your current save data is stored as you expect. Whatever you see on the remote will become your local file system the next time you run a game through emulationstation once you complete the installation.
 
@@ -177,4 +180,3 @@ It would be a good idea to try a system and game that has no saved data first to
   - rpie-preservatives performs synchronization operations across your file system and the remote storage YOU configured. Data loss is a real possibility, if you do not configure things correctly. Be sure to backup your files and follow ALL directions carefully to prevent data loss.
 - I was playing the same game at the same time on two devices and my saves didn't store correctly.
   - This does sync save files, but it can only handle one game at a time. Do not play the same game at the same time and expect both saves to exist. The one you quit last is the one that will be used.
-
