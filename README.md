@@ -7,19 +7,19 @@
   - [About](#about)
   - [How it works](#how-it-works)
     - [excluded files](#excluded-files)
-  - [Disclaimer](#disclaimer)
   - [Installation](#installation)
     - [Install Dependencies](#install-dependencies)
       - [xmlstarlet:](#xmlstarlet)
       - [rclone:](#rclone)
     - [Install rpie-preservatives](#install-rpie-preservatives)
+  - [Disclaimer](#disclaimer)
   - [FAQ](#faq)
 
 ## About
 
 rpie-preservatives is a tool to backup and sync save files from retropie to a remote storage system. It started out as just a simple backup tool, but has grown into a tool allowing full save game synchronization across multpiple devices. This allows you to save games across multiple reotropie machines, and or just have a backup in case everything goes pear-shaped.
 
-Since it utulizes rclone, it provides tremendous flexibility, allowing you to choose from a wide variety of remote storage solutions. You can view all the possible providers [here](https://rclone.org/#providers)
+Since it utilizes rclone, it provides tremendous flexibility, allowing you to choose from a wide variety of remote storage solutions. You can view all the possible providers [here](https://rclone.org/#providers)
 
 rpie-preservatives only saves battery save files (not save states). Save states are quite large to store, and are less stable and flexible overall. I don't have anything against save states, but as far as a backup and synchronization tool is concerned, battery saves are just the way to go.
 
@@ -53,10 +53,6 @@ When you run a game through emulationstation, it calls runcommand with a system 
 
 If your system does not match these, either update your file system to match this, or modify the scripts to exclude files differently as needed. It's probably easier to modify your file system unless you have programming experience. Even then, if you want to update to later versions of the script, having a matching filesystem will make things easier. I use Skraper beta to scrape with, and this is the default output for scraped data. It's a fantastic skraper. Check it out if you haven't used it yet at [https://www.skraper.net](https://www.skraper.net)
 
-## Disclaimer
-
-rpie-preservatives performs synchronization operations across your file system and the remote storage. Data loss is a real possibility if you do not configure things correctly. Be sure to backup your files and follow **<span style="color: red">ALL</span>** directions carefully to prevent data loss. I'm not responsible for any damage or loss caused to your system by use of these tools.
-
 ## Installation
 
 ### Install Dependencies
@@ -67,89 +63,11 @@ rpie-preservatives performs synchronization operations across your file system a
 
 #### rclone:
 
-Follow the steps on [rclone.org](https://rclone.org/downloads/) if the below doesn't work.
+in a terminal, run `curl https://rclone.org/install.sh | sudo bash` This will install rclone.
 
-`curl https://rclone.org/install.sh | sudo bash`
+Next, you must configure a remote with rclone. You need to create a remote named `retropie-backup` to work with rpie-preservatives.
 
-Next you'll need to run `rclone config` to setup you're interface to the remote storage system.
-
-- **<span style="color: red">Be sure to name your remote</span>** `retropie-backup`
-
-The below example is for setting up google drive.
-
-```
-> rclone config
-No remotes found - make a new one
-n) New remote
-r) Rename remote
-c) Copy remote
-s) Set configuration password
-q) Quit config
-n/r/c/s/q> n
-name> retropie-backup
-Type of storage to configure.
-Choose a number from below, or type in your own value
-[snip]
-XX / Google Drive
-   \ "drive"
-[snip]
-Storage> drive
-Google Application Client Id - leave blank normally.
-client_id>
-Google Application Client Secret - leave blank normally.
-client_secret>
-Scope that rclone should use when requesting access from drive.
-Choose a number from below, or type in your own value
- 1 / Full access all files, excluding Application Data Folder.
-   \ "drive"
- 2 / Read-only access to file metadata and file contents.
-   \ "drive.readonly"
-   / Access to files created by rclone only.
- 3 | These are visible in the drive website.
-   | File authorization is revoked when the user deauthorizes the app.
-   \ "drive.file"
-   / Allows read and write access to the Application Data folder.
- 4 | This is not visible in the drive website.
-   \ "drive.appfolder"
-   / Allows read-only access to file metadata but
- 5 | does not allow any access to read or download file content.
-   \ "drive.metadata.readonly"
-scope> 3
-ID of the root folder - leave blank normally.  Fill in to access "Computers" folders. (see docs).
-root_folder_id>
-Service Account Credentials JSON file path - needed only if you want use SA instead of interactive login.
-service_account_file>
-Remote config
-Use auto config?
- * Say Y if not sure
- * Say N if you are working on a remote or headless machine or Y didn't work
-y) Yes
-n) No
-y/n> y
-If your browser doesn't open automatically go to the following link: http://127.0.0.1:53682/auth
-Log in and authorize rclone for access
-Waiting for code...
-Got code
-Configure this as a team drive?
-y) Yes
-n) No
-y/n> n
---------------------
-[remote]
-client_id =
-client_secret =
-scope = drive.file
-root_folder_id =
-service_account_file =
-token = {"access_token":"XXX","token_type":"Bearer","refresh_token":"XXX","expiry":"2014-03-16T13:57:58.955387075Z"}
---------------------
-y) Yes this is OK
-e) Edit this remote
-d) Delete this remote
-y/e/d> y
-```
-
-**Important**: when setting up rclone, be sure to name the remote `retropie-backup`. I also reccommend using the `drive.file` permission so that rclone doesn't have access to all your remote files, but this is up to you.
+Click on the remote storage service you want to use at [https://rclone.org/docs](https://rclone.org/docs) and follow the steps to configure rclone to work with your remote.
 
 ### Install rpie-preservatives
 
@@ -162,6 +80,10 @@ Make sure the dependencies are installed before running this.
 From now on, your saves for any given system will be synced every time you run a game for that system.
 
 It would be a good idea to try a system and game that has no saved data first to ensure it uploads and downloads properly before trying a system with saves you care about.
+
+## Disclaimer
+
+rpie-preservatives performs synchronization operations across your file system and the remote storage. Data loss is a real possibility if you do not configure things correctly. Be sure to backup your files and follow **<span style="color: red">ALL</span>** directions carefully to prevent data loss. I'm not responsible for any damage or loss caused to your system by use of these tools.
 
 ## FAQ
 
