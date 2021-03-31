@@ -1,0 +1,14 @@
+# rclone drive location for rpie-preservatives to backup to.
+# rclone_drive="retropie-backup:retropie-backup"
+rclone_drive="retropie-backup:retropie-backup"
+# path to the location of your roms
+# roms_path="~/RetroPie/roms/"
+roms_path="~/RetroPie/roms/"
+# path to the location of your save files. Only used if `use_content_directory_for_saves` is false.
+# if you have want to use this, be sure to set use_content_directory_for_saves to false.
+# savePath="~/RetroPie/saves/"
+#
+# whether to use the content directory for saves or not. Retropie DOES by default.
+# 1 is on, 0 is off. If you have specified a saves_path, be sure to also set this to 0.
+# use_content_directory_for_saves=1
+use_content_directory_for_saves="true"

@@ -1,18 +1,4 @@
 #!/usr/bin/env bash
-###############################################################################
-# This is a script to backup all save files when using retropie. It syncs the
-# local save files to the remote using rclone.
-#
-# Requires rclone to be installed
-# Requires xmlstarlet to be installed
-###############################################################################
-
-###############################################################################
-# This is the variable that is your backup on the remote. No changes are
-# necessary if you followed the instructions in the readme and setup your 
-# rclone remote with these names. Otherwise, you'll need to proved a new value
-# here to whatever you named your drive.
-###############################################################################
 RCLONE_DRIVE="retropie-backup:retropie-backup"
 
 ###############################################################################
@@ -23,7 +9,8 @@ COMMAND=$1
 SYSTEM=$2
 EMULATOR=$3
 ROM_PATH=$4
-FULL_COMMAND=$5
+RUN_COMMAND=$5
+
 GREEN="\e[92m"
 RED="\e[91m"
 PLAIN="\e[39m"
@@ -79,7 +66,7 @@ sync() {
 }
 
 ###############################################################################
-# Checks whether a system is calid to sync or not. If valid, syncs the system.
+# Checks whether a system is valid to sync or not. If valid, syncs the system.
 # Skips syncing on systems that don't support it (mostly mame). This function
 # is not complete, as I don't have roms for all the systems supported by
 # retroarch, and I don't plan on emulating them all either.
@@ -130,6 +117,18 @@ printAllSystemWarning() {
     printf "\r*** Syncing ***"
 }
 
+printConfig() {
+    echo "config"
+    echo "\trclone_drive: $rclone_drive"
+    echo "\troms_path: $roms_path"
+    echo "\tsave_path: $save_path"
+    echo "\tuse_content_directory_for_saves: $use_content_directory_for_saves"
+}
+
+. ./rpie-settings.cfg
+printConfig
+exit 0
+
 getSystemsExtensionExclusions
 
 if [ $# -eq 0 ]; then
@@ -148,3 +147,5 @@ elif [ $# -eq 1 ]; then
 else
     syncIfValidSystem
 fi
+
+
