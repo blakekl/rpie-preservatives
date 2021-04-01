@@ -1,20 +1,4 @@
 #!/usr/bin/env bash
-RCLONE_DRIVE="retropie-backup:retropie-backup"
-
-###############################################################################
-# This is the rest of the script that performs the actual work. Do not modiy
-# anything below this unless you know what you're doing.
-###############################################################################
-COMMAND=$1
-SYSTEM=$2
-EMULATOR=$3
-ROM_PATH=$4
-RUN_COMMAND=$5
-
-GREEN="\e[92m"
-RED="\e[91m"
-PLAIN="\e[39m"
-
 ###############################################################################
 # Scans the /etc/emulationstation/es_systems.cfg file to find the extensions of
 # rom files. This data is then used to build an exclusion list, so we don't
@@ -38,22 +22,28 @@ getSystemsExtensionExclusions() {
 # uses rclone to sync the remote directory with the local file system for the
 # system we are running. 
 ###############################################################################
-sync() {
-    local ROMS_DIR="${HOME}/RetroPie/roms/${SYSTEM}"
-    local EXCLUDE="${GAME_EXTENSIONS[$SYSTEM_INDEX]}"
-    local SOURCE=""
-    local DEST=""
+syncDirectory() {
+    local system_path="${HOME}/RetroPie/roms/${SYSTEM}"
+    local exclude="${GAME_EXTENSIONS[$SYSTEM_INDEX]}"
+    local source=""
+    local dest=""
+    local states ="state*,"
+
     if [ "$COMMAND" = "download" ]; then
-        SOURCE="${RCLONE_DRIVE}/${SYSTEM}"
-        DEST="${ROMS_DIR}"
+        source="${rclone_drive}/${SYSTEM}"
+        dest="${system_path}"
     else
-        SOURCE="${ROMS_DIR}"
-        DEST="${RCLONE_DRIVE}/${SYSTEM}"
+        source="${system_path}"
+        dest="${rclone_drive}/${SYSTEM}"
     fi
+    if [ "$sync_save_states" = "true"]; then
+        states = ""
+    fi
+    
     echo ""
     echo "  Syncing $SYSTEM save files..."
-    rclone sync "${SOURCE}" "${DEST}" -P \
-        --exclude "*.{state*,xml,txt,chd,ips,ups,bps,DS_Store,oops,0*}" \
+    rclone sync "${source}" "${dest}" -P \
+        --exclude "*.{${states}xml,txt,chd,ips,ups,bps,DS_Store,oops,0*}" \
         --exclude "media/**" \
         --exclude "mame*/**" \
         --exclude "**sd.raw" \
@@ -62,7 +52,7 @@ sync() {
         --exclude "User/Config**" \
         --exclude "User/Logs**" \
         --exclude "PSP/SYSTEM/**" \
-        --exclude "$EXCLUDE"
+        --exclude "$exclude"
 }
 
 ###############################################################################
@@ -81,7 +71,7 @@ syncIfValidSystem() {
         mame-mame4all) ;&
         mame2016) echo "No saves for arcade machines. Skipping." ;;
         retropie) echo "skipping retropie directory" ;;
-        *) sync ;;
+        *) syncDirectory ;;
     esac
 }
 
@@ -121,9 +111,19 @@ printConfig() {
     echo "config"
     echo "\trclone_drive: $rclone_drive"
     echo "\troms_path: $roms_path"
-    echo "\tsave_path: $save_path"
+    echo "\tsaves_path: $saves_path"
     echo "\tuse_content_directory_for_saves: $use_content_directory_for_saves"
 }
+
+COMMAND=$1
+SYSTEM=$2
+EMULATOR=$3
+ROM_PATH=$4
+RUN_COMMAND=$5
+
+GREEN="\e[92m"
+RED="\e[91m"
+PLAIN="\e[39m"
 
 . ./rpie-settings.cfg
 printConfig
