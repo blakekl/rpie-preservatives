@@ -37,7 +37,7 @@ syncDirectory() {
         dest="${rclone_drive}/${SYSTEM}"
     fi
 
-    if [ "$sync_save_states" = "true"]; then
+    if [ "$sync_save_states" = "true" ]; then
         states = ""
     fi
 
