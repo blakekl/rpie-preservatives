@@ -23,7 +23,7 @@ getSystemsExtensionExclusions() {
 # system we are running. 
 ###############################################################################
 syncDirectory() {
-    local system_path="${HOME}/RetroPie/roms/${SYSTEM}"
+    local system_path="${roms_path}/${SYSTEM}"
     local exclude="${GAME_EXTENSIONS[$SYSTEM_INDEX]}"
     local source=""
     local dest=""
