@@ -27,7 +27,7 @@ syncDirectory() {
     local exclude="${GAME_EXTENSIONS[$SYSTEM_INDEX]}"
     local source=""
     local dest=""
-    local states ="state*,"
+    local states="state*,"
 
     if [ "$COMMAND" = "download" ]; then
         source="${rclone_drive}/${SYSTEM}"
@@ -36,6 +36,7 @@ syncDirectory() {
         source="${system_path}"
         dest="${rclone_drive}/${SYSTEM}"
     fi
+
     if [ "$sync_save_states" = "true"]; then
         states = ""
     fi
