@@ -39,7 +39,7 @@ syncDirectory() {
     if [ "$sync_save_states" = "true"]; then
         states = ""
     fi
-    
+
     echo ""
     echo "  Syncing $SYSTEM save files..."
     rclone sync "${source}" "${dest}" -P \
@@ -109,10 +109,9 @@ printAllSystemWarning() {
 
 printConfig() {
     echo "config"
-    echo "\trclone_drive: $rclone_drive"
-    echo "\troms_path: $roms_path"
-    echo "\tsaves_path: $saves_path"
-    echo "\tuse_content_directory_for_saves: $use_content_directory_for_saves"
+    echo "rclone_drive: $rclone_drive"
+    echo "roms_path: $roms_path"
+    echo "sync_save_states: $sync_save_states"
 }
 
 COMMAND=$1
