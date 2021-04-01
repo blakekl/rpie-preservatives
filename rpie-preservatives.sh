@@ -93,6 +93,7 @@ printUsage() {
 ###############################################################################
 printAllSystemWarning() {
     echo "No system passed in. All saves will be ${COMMAND}ed. (Ctl-C to abort)"
+    printCountdown
     printf "syncing in 5"
     sleep 1
     printf "\rsyncing in 4"
@@ -107,11 +108,35 @@ printAllSystemWarning() {
     printf "\r*** Syncing ***"
 }
 
+###############################################################################
+# prints a list of the current settings before performing the sync.
+###############################################################################
 printConfig() {
-    echo "config"
-    echo "rclone_drive: $rclone_drive"
-    echo "roms_path: $roms_path"
-    echo "sync_save_states: $sync_save_states"
+    echo "executing with current settings: "
+    echo "  rclone_drive: $rclone_drive"
+    echo "  roms_path: $roms_path"
+    echo "  sync_save_states: $sync_save_states"
+    echo ""
+    printCountdown
+}
+
+###############################################################################
+# prints a countdown before proceeding.
+###############################################################################
+printCountdown() {
+    printf "syncing in 5"
+    sleep 1
+    printf "\rsyncing in 4"
+    sleep 1
+    printf "\rsyncing in 3"
+    sleep 1
+    printf "\rsyncing in 2"
+    sleep 1
+    printf "\rsyncing in 1"
+    sleep 1
+    printf "\rsyncing in 0"
+    printf "\r*** Syncing ***"
+
 }
 
 COMMAND=$1
@@ -125,9 +150,8 @@ RED="\e[91m"
 PLAIN="\e[39m"
 
 . ./rpie-settings.cfg
-printConfig
-exit 0
 
+printConfig
 getSystemsExtensionExclusions
 
 if [ $# -eq 0 ]; then
