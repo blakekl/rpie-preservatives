@@ -118,7 +118,6 @@ printConfig() {
     echo "  roms_path: $roms_path"
     echo "  sync_save_states: $sync_save_states"
     echo ""
-    printCountdown
 }
 
 ###############################################################################
