@@ -38,7 +38,7 @@ syncDirectory() {
     fi
 
     if [ "$sync_save_states" = "true" ]; then
-        states = ""
+        states=""
     fi
 
     echo ""
