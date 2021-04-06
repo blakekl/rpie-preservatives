@@ -17,13 +17,13 @@
 
 ## About
 
-rpie-preservatives is a tool to backup and sync save files from retropie to a remote storage system. It started out as just a simple backup tool, but has grown into a tool allowing full save game synchronization across multpiple devices. This allows you to save games across multiple reotropie machines, and or just have a backup in case everything goes pear-shaped.
+rpie-preservatives is a tool to backup and sync save files from retropie to a remote storage system. It started out as just a simple backup tool, but has grown into a tool allowing full save game synchronization across multiple devices. This allows you to save games across multiple retropie machines, and or just have a backup in case everything goes pear-shaped.
 
 Since it utilizes rclone, it provides tremendous flexibility, allowing you to choose from a wide variety of remote storage solutions. You can view all the possible providers [here](https://rclone.org/#providers)
 
-rpie-preservatives only saves battery save files (not save states). Save states are quite large to store, and are less stable and flexible overall. I don't have anything against save states, but as far as a backup and synchronization tool is concerned, battery saves are just the way to go.
+rpie-preservatives only saves battery save files by default. Save states are quite large to store, and are less stable and flexible. They also are somewhat unreliable overall. There is a config option to sync save states as well, but you will have to manually add it yourself.
 
-rpie-preservatives supports many systems, but I can't test them all alone. There may be some systems that sync too many files (the dolphin core for gc and wii and even ppsspp store more than necessary, but the size isn't too great and doesn't take long to sync after initial upload). There may be others in the same boat, but I don't run all systems (and I never will).
+rpie-preservatives supports many systems, but I can't test them all alone. There may be some systems that sync too many files (the dolphin core for gc and wii and even ppsspp store more than necessary, but the size isn't too great and doesn't take long to sync after initial upload). There may be others in the same boat, but I don't run all systems (and I never will). If an issue is opened with good details and you're willing to do testing for me, we can add any systems that don't appear to work correctly.
 
 ## How it works
 
@@ -33,20 +33,12 @@ When you run a game through emulationstation, it calls runcommand with a system 
 
 ### excluded files
 
-- save state files
-  - .state
-  - .oops
-  - .0\*
 - scraped info
   - media/\*\*
   - .xml
-- translation patch files
-  - .ips
-  - .ups
-  - .bps
 - emulator specific files
   - mame\*/\*\*
-  - \*\*sd.raw
+  - \*\*sd.raw (this is an sd card file in dolphin for gamecube and wii. It's large)
   - Mupen64plus/\*\*
 - others
   - .chd (If you're using chd, you also are probably using .m3u files, so .chd is missing from es_systems.cfg on purpose. If you aren't using .m3u with .chd, you really should be);
@@ -65,7 +57,7 @@ If your system does not match these, either update your file system to match thi
 
 in a terminal, run `curl https://rclone.org/install.sh | sudo bash` This will install rclone.
 
-Next, you must configure a remote with rclone. You need to create a remote named `retropie-backup` to work with rpie-preservatives.
+Next, you must configure a remote with rclone.
 
 Click on the remote storage service you want to use at [https://rclone.org/docs](https://rclone.org/docs) and follow the steps to configure rclone to work with your remote.
 

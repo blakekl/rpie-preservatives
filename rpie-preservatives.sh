@@ -27,7 +27,8 @@ syncDirectory() {
     local exclude="${GAME_EXTENSIONS[$SYSTEM_INDEX]}"
     local source=""
     local dest=""
-    local states="state*,"
+    local states="state*,oops,0*,"
+    local patch_files="ips,ups,bps,"
 
     if [ "$COMMAND" = "download" ]; then
         source="${rclone_drive}/${SYSTEM}"
@@ -41,11 +42,15 @@ syncDirectory() {
         states=""
     fi
 
+    if [ "$sync_patch_files" = "true" ]; then
+        patch_files=""
+    fi
+
     echo ""
     echo "Syncing $SYSTEM save files..."
     echo ""
     rclone sync "${source}" "${dest}" -P \
-        --exclude "*.{${states}xml,txt,chd,ips,ups,bps,DS_Store,oops,0*}" \
+        --exclude "*.{${states}${patch_files}xml,txt,chd,DS_Store}" \
         --exclude "media/**" \
         --exclude "mame*/**" \
         --exclude "**sd.raw" \
@@ -166,10 +171,17 @@ verifySettings() {
         result=1
     fi
     
+    sync_patch_files=`echo "$sync_patch_files" | awk '{print tolower($0)}'`
+    if [[ "$sync_patch_files" != "true" ]] && [[ "$sync_patch_files" != "false" ]]; then
+        printSettingBooleanError "sync_patch_files"
+        result=1
+    fi
+    
     if ! [[ "$rclone_drive" =~ ^.+:.+$ ]]; then
         echo "   rclone_drive does not appear to be valid. Must be in the format remote:DESTINATION. Correct value in rpie-settings.cfg"
         result=1
     fi
+
     return $result
 }
 
