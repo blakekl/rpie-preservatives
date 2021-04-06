@@ -139,6 +139,14 @@ printCountdown() {
 
 }
 
+###############################################################################
+# Verifies the values in the settings file to ensure the values are valid.
+# Prints out any errors it finds.
+###############################################################################
+verifySettings() {
+
+}
+
 COMMAND=$1
 SYSTEM=$2
 EMULATOR=$3
@@ -149,7 +157,12 @@ GREEN="\e[92m"
 RED="\e[91m"
 PLAIN="\e[39m"
 
-. ./rpie-settings.cfg
+if test -f "./rpie-settings.cfg"; then
+    . ./rpie-settings.cfg
+else
+    echo "rpie-settings.cfg could not be found. Ensure rpie-settings.cfg exist in " | pwd
+    exit 1
+fi
 
 printConfig
 getSystemsExtensionExclusions
