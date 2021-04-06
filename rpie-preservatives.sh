@@ -95,21 +95,6 @@ printUsage() {
 printAllSystemWarning() {
     echo "No system passed in. All saves will be ${COMMAND}ed. (Ctl-C to abort)"
     printCountdown
-<<<<<<< HEAD
-    printf "syncing in 5"
-    sleep 1
-    printf "\rsyncing in 4"
-    sleep 1
-    printf "\rsyncing in 3"
-    sleep 1
-    printf "\rsyncing in 2"
-    sleep 1
-    printf "\rsyncing in 1"
-    sleep 1
-    printf "\rsyncing in 0"
-    printf "\r*** Syncing ***"
-=======
->>>>>>> closes #5 - Removes countdown code from printAllSystemsWarning. Now calls the printCountdown function.
 }
 
 ###############################################################################
