@@ -176,7 +176,7 @@ verifySettings() {
         echo "rclone_drive does not appear to be valid. Must be in the format remote:DESTINATION."
         result=1
     fi
-    return result
+    return $result
 }
 
 
