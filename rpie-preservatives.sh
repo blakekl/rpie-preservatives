@@ -139,10 +139,17 @@ printCountdown() {
 
 }
 
+
+###############################################################################
+# prints an error messages for missing files/folders from config file.
+###############################################################################
 printSettingNotFoundError(){
     echo "   ${1} not found. Ensure the value for ${1} in rpie-settings.cfg is correct."
 }
 
+###############################################################################
+# prints an error message for bad boolean values from config file.
+###############################################################################
 printSettingBooleanError() {
     echo "   ${1} has a bad value. Valid values are '${TRUE}' and '${FALSE}'. Ensure ${1} in rpie-settings.cfg is correct."
 }
