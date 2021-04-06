@@ -144,7 +144,7 @@ printCountdown() {
 # Prints out any errors it finds.
 ###############################################################################
 verifySettings() {
-
+    echo "verifying settings."
 }
 
 COMMAND=$1
