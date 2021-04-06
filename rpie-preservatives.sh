@@ -171,7 +171,7 @@ verifySettings() {
         result=1
     fi
     
-    if ! [[ "$rclone_drive" =~ \w+:\w+ ]]; then
+    if ! [[ "$rclone_drive" =~ ^.+:.+$ ]]; then
         echo "rclone_drive does not appear to be valid. Must be in the format remote:DESTINATION."
         result=1
     fi
