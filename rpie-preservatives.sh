@@ -168,8 +168,7 @@ verifySettings() {
         printSettingBooleanError "sync_save_states"
         result=1
     fi
-    if [[ "$rclone_drive" =~ \w+:\w+ ]]; then
-    else
+    if ! [[ "$rclone_drive" =~ \w+:\w+ ]]; then
         echo "rclone_drive does not appear to be valid. Must be in the format remote:DESTINATION."
         result=1
     fi
