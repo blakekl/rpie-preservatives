@@ -42,7 +42,8 @@ syncDirectory() {
     fi
 
     echo ""
-    echo "  Syncing $SYSTEM save files..."
+    echo "Syncing $SYSTEM save files..."
+    echo ""
     rclone sync "${source}" "${dest}" -P \
         --exclude "*.{${states}xml,txt,chd,ips,ups,bps,DS_Store,oops,0*}" \
         --exclude "media/**" \
@@ -64,13 +65,6 @@ syncDirectory() {
 ###############################################################################
 syncIfValidSystem() {
     case $SYSTEM in 
-        mame) ;&
-        arcade) ;&
-        fba) ;&
-        mame-advmame) ;&
-        mame-libretro) ;&
-        mame-mame4all) ;&
-        mame2016) echo "No saves for arcade machines. Skipping." ;;
         retropie) echo "skipping retropie directory" ;;
         kodi) echo "skipping kodi" ;;
         *) syncDirectory ;;
@@ -203,6 +197,7 @@ if test -f "./rpie-settings.cfg"; then
     . ./rpie-settings.cfg
     verifySettings
     if [ $? -eq 0 ]; then
+        echo "Settings valid!"
         getSystemsExtensionExclusions
 
         if [ $# -eq 0 ]; then
