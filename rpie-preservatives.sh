@@ -147,6 +147,16 @@ verifySettings() {
     echo "verifying settings."
 }
 
+
+###############################################################################
+# prints the missing config file message.
+###############################################################################
+printMissingConfig() {
+    local workingDir=pwd
+    echo "rpie-settings.cfg could not be found. Ensure rpie-settings.cfg exist in ${workingDir}"
+    exit 1
+}
+
 COMMAND=$1
 SYSTEM=$2
 EMULATOR=$3
@@ -160,9 +170,7 @@ PLAIN="\e[39m"
 if test -f "./rpie-settings.cfg"; then
     . ./rpie-settings.cfg
 else
-    local workingDir=pwd
-    echo "rpie-settings.cfg could not be found. Ensure rpie-settings.cfg exist in ${workingDir}"
-    exit 1
+    printMissingConfig
 fi
 
 printConfig
