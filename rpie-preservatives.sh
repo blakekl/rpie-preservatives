@@ -72,6 +72,7 @@ syncIfValidSystem() {
         mame-mame4all) ;&
         mame2016) echo "No saves for arcade machines. Skipping." ;;
         retropie) echo "skipping retropie directory" ;;
+        kodi) echo "skipping kodi"
         *) syncDirectory ;;
     esac
 }
@@ -175,6 +176,7 @@ verifySettings() {
         echo "rclone_drive does not appear to be valid. Must be in the format remote:DESTINATION."
         result=1
     fi
+    return result
 }
 
 
@@ -199,7 +201,8 @@ PLAIN="\e[39m"
 
 if test -f "./rpie-settings.cfg"; then
     . ./rpie-settings.cfg
-    if verifySettings; then
+    verifySettings
+    if $?; then
         getSystemsExtensionExclusions
 
         if [ $# -eq 0 ]; then
