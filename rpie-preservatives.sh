@@ -38,11 +38,11 @@ syncDirectory() {
         dest="${rclone_drive}/${SYSTEM}"
     fi
 
-    if [ "$sync_save_states" = "true" ]; then
+    if [ "$sync_save_states" = "$TRUE" ]; then
         states=""
     fi
 
-    if [ "$sync_patch_files" = "true" ]; then
+    if [ "$sync_patch_files" = "$TRUE" ]; then
         patch_files=""
     fi
 
@@ -144,7 +144,7 @@ printSettingNotFoundError(){
 }
 
 printSettingBooleanError() {
-    echo "   ${1} has a bad value. Valid values are 'true' and 'false'. Ensure ${1} in rpie-settings.cfg is correct."
+    echo "   ${1} has a bad value. Valid values are '${TRUE}' and '${FALSE}'. Ensure ${1} in rpie-settings.cfg is correct."
 }
 
 ###############################################################################
@@ -166,13 +166,13 @@ verifySettings() {
     fi
 
     sync_save_states=`echo "$sync_save_states" | awk '{print tolower($0)}'`
-    if [[ "$sync_save_states" != "true" ]] && [[ "$sync_save_states" != "false" ]]; then
+    if [[ "$sync_save_states" != "$TRUE" ]] && [[ "$sync_save_states" != "$FALSE" ]]; then
         printSettingBooleanError "sync_save_states"
         result=1
     fi
     
     sync_patch_files=`echo "$sync_patch_files" | awk '{print tolower($0)}'`
-    if [[ "$sync_patch_files" != "true" ]] && [[ "$sync_patch_files" != "false" ]]; then
+    if [[ "$sync_patch_files" != "$TRUE" ]] && [[ "$sync_patch_files" != "$FALSE" ]]; then
         printSettingBooleanError "sync_patch_files"
         result=1
     fi
@@ -204,6 +204,8 @@ RUN_COMMAND=$5
 GREEN="\e[92m"
 RED="\e[91m"
 PLAIN="\e[39m"
+TRUE="true"
+FALSE="false"
 
 if test -f "./rpie-settings.cfg"; then
     . ./rpie-settings.cfg
