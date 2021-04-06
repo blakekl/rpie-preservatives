@@ -155,19 +155,22 @@ verifySettings() {
     echo "verifying settings."
     local result=0
 
-    if ! [[ test -d "${roms_path}" ]]; then 
+    if ! [ -d "${roms_path}" ]; then 
         printSettingNotFoundError "roms_path"
         result=1
     fi
-    if ! [[ test -f "${es_systems_path}" ]]; then
+    
+    if ! [ -f "${es_systems_path}" ]; then
         printSettingError "es_systems_path"
         result=1
     fi
+
     sync_save_states=`echo "$sync_save_states" | awk '{print tolower($0)}'`
     if [[ "$sync_save_states" != "true" ]] && [[ "$sync_save_states" != "false" ]]; then
         printSettingBooleanError "sync_save_states"
         result=1
     fi
+    
     if ! [[ "$rclone_drive" =~ \w+:\w+ ]]; then
         echo "rclone_drive does not appear to be valid. Must be in the format remote:DESTINATION."
         result=1
