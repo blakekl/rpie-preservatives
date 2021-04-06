@@ -5,6 +5,10 @@ rclone_drive="retropie-backup:retropie-backup"
 # individual systems as subpaths. 
 # roms_path="${HOME}/RetroPie/roms/"
 roms_path="${HOME}/RetroPie/roms"
+# path to the es_systems file. Used to parse out game files so they
+# are not synced to the remote storag location
+# es_systems_path="/etc/emulationstation/es_systems.cfg"
+es_systems_path="/etc/emulationstation/es_systems.cfg"
 # if "true", the save states will be synced. false by default due to
 # save states being somewhat unreliable and larger in size than the 
 # battery saves in most cases.
