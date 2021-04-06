@@ -155,11 +155,11 @@ verifySettings() {
     echo "verifying settings."
     local result=0
 
-    if test -d "${roms_path}" -eq 1; then 
+    if ! [[ test -d "${roms_path}" ]]; then 
         printSettingNotFoundError "roms_path"
         result=1
     fi
-    if test -f "${es_systems_path}" -eq 1; then
+    if ! [[ test -f "${es_systems_path}" ]]; then
         printSettingError "es_systems_path"
         result=1
     fi
