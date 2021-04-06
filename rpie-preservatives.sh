@@ -202,7 +202,7 @@ PLAIN="\e[39m"
 if test -f "./rpie-settings.cfg"; then
     . ./rpie-settings.cfg
     verifySettings
-    if $?; then
+    if [ $? -eq 0 ]; then
         getSystemsExtensionExclusions
 
         if [ $# -eq 0 ]; then
@@ -221,6 +221,8 @@ if test -f "./rpie-settings.cfg"; then
         else
             syncIfValidSystem
         fi
+    else
+        exit 1
     fi
 else
     printMissingConfig
