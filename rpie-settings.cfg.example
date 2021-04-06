@@ -1,0 +1,6 @@
+# See https://github.com/blakekl/rpie-preservatives#rpie-settingscfg for explaination of values.
+es_systems_path="/etc/emulationstation/es_systems.cfg"
+rclone_drive="retropie-backup:retropie-backup"
+roms_path="${HOME}/RetroPie/roms"
+sync_patch_files="false"
+sync_save_states="false"

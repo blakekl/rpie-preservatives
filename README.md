@@ -12,18 +12,19 @@
       - [xmlstarlet:](#xmlstarlet)
       - [rclone:](#rclone)
     - [Install rpie-preservatives](#install-rpie-preservatives)
+  - [rpie-settings.cfg](#rpie-settingscfg)
   - [Disclaimer](#disclaimer)
   - [FAQ](#faq)
 
 ## About
 
-rpie-preservatives is a tool to backup and sync save files from retropie to a remote storage system. It started out as just a simple backup tool, but has grown into a tool allowing full save game synchronization across multpiple devices. This allows you to save games across multiple reotropie machines, and or just have a backup in case everything goes pear-shaped.
+rpie-preservatives is a tool to backup and sync save files from retropie to a remote storage system. It started out as just a simple backup tool, but has grown into a tool allowing full save game synchronization across multiple devices. This allows you to save games across multiple retropie machines, and or just have a backup in case everything goes pear-shaped.
 
 Since it utilizes rclone, it provides tremendous flexibility, allowing you to choose from a wide variety of remote storage solutions. You can view all the possible providers [here](https://rclone.org/#providers)
 
-rpie-preservatives only saves battery save files (not save states). Save states are quite large to store, and are less stable and flexible overall. I don't have anything against save states, but as far as a backup and synchronization tool is concerned, battery saves are just the way to go.
+rpie-preservatives only saves battery save files by default. Save states are quite large to store, and are less stable and flexible. They also are somewhat unreliable overall. There is a config option to sync save states as well, but you will have to manually add it yourself.
 
-rpie-preservatives supports many systems, but I can't test them all alone. There may be some systems that sync too many files (the dolphin core for gc and wii and even ppsspp store more than necessary, but the size isn't too great and doesn't take long to sync after initial upload). There may be others in the same boat, but I don't run all systems (and I never will).
+rpie-preservatives supports many systems, but I can't test them all alone. There may be some systems that sync too many files (the dolphin core for gc and wii and even ppsspp store more than necessary, but the size isn't too great and doesn't take long to sync after initial upload). There may be others in the same boat, but I don't run all systems (and I never will). If an issue is opened with good details and you're willing to do testing for me, we can add any systems that don't appear to work correctly.
 
 ## How it works
 
@@ -33,20 +34,12 @@ When you run a game through emulationstation, it calls runcommand with a system 
 
 ### excluded files
 
-- save state files
-  - .state
-  - .oops
-  - .0\*
 - scraped info
   - media/\*\*
   - .xml
-- translation patch files
-  - .ips
-  - .ups
-  - .bps
 - emulator specific files
   - mame\*/\*\*
-  - \*\*sd.raw
+  - \*\*sd.raw (this is an sd card file in dolphin for gamecube and wii. It's large)
   - Mupen64plus/\*\*
 - others
   - .chd (If you're using chd, you also are probably using .m3u files, so .chd is missing from es_systems.cfg on purpose. If you aren't using .m3u with .chd, you really should be);
@@ -65,7 +58,7 @@ If your system does not match these, either update your file system to match thi
 
 in a terminal, run `curl https://rclone.org/install.sh | sudo bash` This will install rclone.
 
-Next, you must configure a remote with rclone. You need to create a remote named `retropie-backup` to work with rpie-preservatives.
+Next, you must configure a remote with rclone.
 
 Click on the remote storage service you want to use at [https://rclone.org/docs](https://rclone.org/docs) and follow the steps to configure rclone to work with your remote.
 
@@ -75,11 +68,26 @@ Make sure the dependencies are installed before running this.
 
 - Download the archive from releases. Make sure `install.sh` is executable (`chmod +x ./install.sh`) and then run the installer. `./install.sh`.
   - It will ask for your password if you are not root.
+- Copy the /opt/retropie/configs/all/rpie-settings.cfg.example file to /opt/retropie/configs/all/rpie-setting.cfg
+  - Make any edits to the config file if you don't like the default settings.
+  - finally, run `/opt/retropie/configs/all/rpie-preservatives.sh upload` in a terminal. This will execute a full backup of your current saves.
 - Check your remote store manually at this point to ensure your current save data is stored as you expect. Whatever you see on the remote will become your local file system the next time you run a game through emulationstation once you complete the installation.
 
 From now on, your saves for any given system will be synced every time you run a game for that system.
 
 It would be a good idea to try a system and game that has no saved data first to ensure it uploads and downloads properly before trying a system with saves you care about.
+
+## rpie-settings.cfg
+
+rpie-settings.cfg is a file that contains various settings for the rpie-preservatives script to use during execution. I suggest starting off by copying rpie-settings.cfg.example -> rpie-settings.cfg. I tried to have reasonable defaults here, but there are some values you may want to look at. 
+
+| setting name     | description                                                                                                                                                                                                                                                                                                                                                                      | default                                | possible values
+|------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------|--------------------------------------------------------------------------------|
+| es_systems_path  | Path to the es_systems file. Used to parse out game files so they are not stored on the remote. Defaults to the default location in retropie. Included here for people who may not be running a retropie install, but want to use the script on retroarch or something. You will need to copy over a valid es_systems.cfg file to that system, but it's not terribly difficult.  | "/etc/emulationstation/es_systems.cfg" |any path wrapped in quotes ("")
+| rclone_drive     | The rclone drive you setup during installation. It should be in the format "remote:DESTINATION", per the rclone docs.                                                                                                                                                                                                                                                            | "retropie-backup:retropie-backup"      |any value in quotes with a colon surrounded by any other characters.
+| roms_path        | The path where the folders for you systems exist. The folder names of the systems should match the system names in the es_systems.cfg file.                                                                                                                                                                                                                                      | "${HOME}/RetroPie/roms"                |any path wrapped in quotes ("")
+| sync_patch_files | Whether or not to sync ips, ups, and bps patch files. If "true", backups will be stored on the remote.                                                                                                                                                                                                                                                                           | "false"                                |"true" or "false"
+| sync_save_states | Whether or not to sync save state files (.state*,.0*,.oops). If "true" save states will be stored on the remote.                                                                                                                                                                                                                                                                 | "false"                                |"true" or "false"
 
 ## Disclaimer
 
