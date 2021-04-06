@@ -72,7 +72,7 @@ syncIfValidSystem() {
         mame-mame4all) ;&
         mame2016) echo "No saves for arcade machines. Skipping." ;;
         retropie) echo "skipping retropie directory" ;;
-        kodi) echo "skipping kodi"
+        kodi) echo "skipping kodi" ;;
         *) syncDirectory ;;
     esac
 }
