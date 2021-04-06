@@ -173,7 +173,7 @@ verifySettings() {
     fi
     
     if ! [[ "$rclone_drive" =~ ^.+:.+$ ]]; then
-        echo "rclone_drive does not appear to be valid. Must be in the format remote:DESTINATION."
+        echo "rclone_drive does not appear to be valid. Must be in the format remote:DESTINATION. Correct value in rpie-settings.cfg"
         result=1
     fi
     return $result
