@@ -160,7 +160,8 @@ PLAIN="\e[39m"
 if test -f "./rpie-settings.cfg"; then
     . ./rpie-settings.cfg
 else
-    echo "rpie-settings.cfg could not be found. Ensure rpie-settings.cfg exist in " | pwd
+    local workingDir=pwd
+    echo "rpie-settings.cfg could not be found. Ensure rpie-settings.cfg exist in ${workingDir}"
     exit 1
 fi
 
