@@ -139,12 +139,40 @@ printCountdown() {
 
 }
 
+printSettingNotFoundError(){
+    echo "${1} not found. Ensure the value for ${1} in rpie-settings.cfg is correct."
+}
+
+printSettingBooleanError() {
+    echo "${1} has a bad value. Valid values are 'true' and 'false'. Ensure ${1} in rpie-settings.cfg is correct."
+}
+
 ###############################################################################
 # Verifies the values in the settings file to ensure the values are valid.
 # Prints out any errors it finds.
 ###############################################################################
 verifySettings() {
     echo "verifying settings."
+    local result=0
+
+    if test -d "${roms_path}" -eq 1; then 
+        printSettingNotFoundError "roms_path"
+        result=1
+    fi
+    if test -f "${es_systems_path}" -eq 1; then
+        printSettingError "es_systems_path"
+        result=1
+    fi
+    sync_save_states=`echo "$sync_save_states" | awk '{print tolower($0)}'`
+    if [[ "$sync_save_states" != "true" ]] && [[ "$sync_save_states" != "false" ]]; then
+        printSettingBooleanError "sync_save_states"
+        result=1
+    fi
+    if [[ "$rclone_drive" =~ \w+:\w+ ]]; then
+    else
+        echo "rclone_drive does not appear to be valid. Must be in the format remote:DESTINATION."
+        result=1
+    fi
 }
 
 
@@ -169,28 +197,27 @@ PLAIN="\e[39m"
 
 if test -f "./rpie-settings.cfg"; then
     . ./rpie-settings.cfg
+    if verifySettings; then
+        getSystemsExtensionExclusions
+
+        if [ $# -eq 0 ]; then
+            printUsage
+        elif [ $# -eq 1 ]; then
+            if [ "$1" = "upload" ] || [ "$1" = "download" ]; then
+                printAllSystemWarning
+                for i in "${!SYSTEMS[@]}"; do
+                    SYSTEM_INDEX="$i"
+                    SYSTEM="${SYSTEMS[$i]}"
+                    syncIfValidSystem
+                done
+            else
+                printUsage
+            fi
+        else
+            syncIfValidSystem
+        fi
+    fi
 else
     printMissingConfig
 fi
-
-printConfig
-getSystemsExtensionExclusions
-
-if [ $# -eq 0 ]; then
-    printUsage
-elif [ $# -eq 1 ]; then
-    if [ "$1" = "upload" ] || [ "$1" = "download" ]; then
-        printAllSystemWarning
-        for i in "${!SYSTEMS[@]}"; do
-            SYSTEM_INDEX="$i"
-            SYSTEM="${SYSTEMS[$i]}"
-            syncIfValidSystem
-        done
-    else
-        printUsage
-    fi
-else
-    syncIfValidSystem
-fi
-
 
