@@ -141,11 +141,11 @@ printCountdown() {
 }
 
 printSettingNotFoundError(){
-    echo "${1} not found. Ensure the value for ${1} in rpie-settings.cfg is correct."
+    echo "   ${1} not found. Ensure the value for ${1} in rpie-settings.cfg is correct."
 }
 
 printSettingBooleanError() {
-    echo "${1} has a bad value. Valid values are 'true' and 'false'. Ensure ${1} in rpie-settings.cfg is correct."
+    echo "   ${1} has a bad value. Valid values are 'true' and 'false'. Ensure ${1} in rpie-settings.cfg is correct."
 }
 
 ###############################################################################
@@ -162,7 +162,7 @@ verifySettings() {
     fi
     
     if ! [ -f "${es_systems_path}" ]; then
-        printSettingError "es_systems_path"
+        printSettingNotFoundError "es_systems_path"
         result=1
     fi
 
@@ -173,7 +173,7 @@ verifySettings() {
     fi
     
     if ! [[ "$rclone_drive" =~ ^.+:.+$ ]]; then
-        echo "rclone_drive does not appear to be valid. Must be in the format remote:DESTINATION. Correct value in rpie-settings.cfg"
+        echo "   rclone_drive does not appear to be valid. Must be in the format remote:DESTINATION. Correct value in rpie-settings.cfg"
         result=1
     fi
     return $result
