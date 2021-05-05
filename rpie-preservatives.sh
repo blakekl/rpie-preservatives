@@ -49,7 +49,7 @@ syncDirectory() {
     echo ""
     echo "Syncing $SYSTEM save files..."
     echo ""
-    rclone sync "${source}" "${dest}" -P \
+    rclone sync -L "${source}" "${dest}" -P \
         --exclude "*.{${states}${patch_files}xml,txt,chd,DS_Store}" \
         --exclude "media/**" \
         --exclude "mame*/**" \
@@ -202,8 +202,8 @@ PLAIN="\e[39m"
 TRUE="true"
 FALSE="false"
 
-if test -f "./rpie-settings.cfg"; then
-    . ./rpie-settings.cfg
+if test -a "/opt/retropie/configs/all/rpie-settings.cfg"; then
+    . /opt/retropie/configs/all/rpie-settings.cfg
     verifySettings
     if [ $? -eq 0 ]; then
         echo "Settings valid!"
