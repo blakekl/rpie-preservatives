@@ -49,7 +49,7 @@ syncDirectory() {
     echo ""
     echo "Syncing $SYSTEM save files..."
     echo ""
-    rclone sync -L "${source}" "${dest}" -P \
+    rclone sync -v -L "${source}" "${dest}" -P \
         --exclude "*.{${states}${patch_files}xml,txt,chd,DS_Store}" \
         --exclude "media/**" \
         --exclude "mame*/**" \
