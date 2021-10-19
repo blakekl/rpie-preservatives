@@ -83,11 +83,46 @@ rpie-settings.cfg is a file that contains various settings for the rpie-preserva
 
 | setting name     | description                                                                                                                                                                                                                                                                                                                                                                      | default                                | possible values
 |------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------|--------------------------------------------------------------------------------|
-| es_systems_path  | Path to the es_systems file. Used to parse out game files so they are not stored on the remote. Defaults to the default location in retropie. Included here for people who may not be running a retropie install, but want to use the script on retroarch or something. You will need to copy over a valid es_systems.cfg file to that system, but it's not terribly difficult.  | "/etc/emulationstation/es_systems.cfg" |any path wrapped in quotes ("")
+| es_systems_path  | Path to the es_systems file. Used to parse out game files so they are not stored on the remote. Defaults to the default location in retropie. Included here for people who may not be running a retropie install, but want to use the script on retroarch or something. You will need to copy over a valid es_systems.cfg file to that system, but it's not terribly difficult. For more information see the es_systems.cfg section below.  | "/etc/emulationstation/es_systems.cfg" |any path wrapped in quotes ("")
 | rclone_drive     | The rclone drive you setup during installation. It should be in the format "remote:DESTINATION", per the rclone docs.                                                                                                                                                                                                                                                            | "retropie-backup:retropie-backup"      |any value in quotes with a colon surrounded by any other characters.
 | roms_path        | The path where the folders for you systems exist. The folder names of the systems should match the system names in the es_systems.cfg file.                                                                                                                                                                                                                                      | "${HOME}/RetroPie/roms"                |any path wrapped in quotes ("")
 | sync_patch_files | Whether or not to sync ips, ups, and bps patch files. If "true", backups will be stored on the remote.                                                                                                                                                                                                                                                                           | "false"                                |"true" or "false"
 | sync_save_states | Whether or not to sync save state files (.state*,.0*,.oops). If "true" save states will be stored on the remote.                                                                                                                                                                                                                                                                 | "false"                                |"true" or "false"
+
+
+## es_systems.cfg
+
+### What is it?
+The es_systems.cfg file is an XML file used by emulationstation to scan for game files and also configure how the various emulators and roms are launched. As far as this program is concerned, all we care about are the `<name>` and `<extension>` tags. The script essentially scans this document for the matching system name. Your folder containing the roms for this system and the `<name>` tag must match for this to work. It then looks at the `<extension>` tag values. This tag tells emulationstation which file extensions represent the rom files. rpie-preservatives scans your system directory and removes any files that matches the `<extension>` tags extensions from its sync list. All files that don't match the `<extension>` tag or any other global ignores (like `.txt` or `.png`) will be synced to your remote storage.
+
+### What if I'm using this without using emulationstation or retropie?
+You can create your own XML file that describes this data and enter that file's path in the rpie-settings.cfg for the `es_systems_path` value. You just need to follow the format described below. Replace anything inside `{}` with the values that fit your data. Extensions are case sensitive.
+
+```
+<systemList>
+  <system>
+    <name>{name of the folder containing the rom for that system. IE nes, snes, or megadrive, etc.}</name>
+    <extension>{a space separated list of extensions including the '.'. IE: '.nes .zip .7z'}</extension>
+  </system>
+</systemList>
+```
+
+If this isn't a retropie installation, you can include any other extensions you want to ignore in the extension list too. Don't do this if you are running emulationstation. It will include files you don't intend to in your game list in emulationstation.
+
+Here's a final example, just in case.
+
+```
+<systemList>
+  <system>
+    <name>psx</name>
+    <extension>.cue .m3u .chd .CUE .M3U .CHD</extension>
+  </system>
+  <system>
+    <name>snes</name>
+    <extension>.sfc .zip .7z .SFC .ZIP .7z</extension>
+  </system>
+</systemList>
+```
 
 ## Disclaimer
 
