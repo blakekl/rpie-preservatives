@@ -3,17 +3,29 @@
 # Scans the es_systems_path file to find the extensions of  rom files. This 
 # data is then used to build an exclusion list, so we don't end up syncing 
 # large rom files by mistake.
+#
+# could possibly replace the xmlstarlet commands with something like this
+# instead. Wouldn't require xmlstarlet to be installed anymore, which would be
+# nice.
+# grep -P "(<name>|<extension>)[^<]*<" /etc/emulationstation/es_systems.cfg | sed 's/<name>//g' | sed 's/<extension>//g' | sed 's/<\/name>//g' | sed 's/<\/extension>//g'
 ###############################################################################
 getSystemsExtensionExclusions() {
-    mapfile -t < <( xmlstarlet sel -t -m "/systemList/system"  -v "name" -n ${es_systems_path} )
-    SYSTEMS=("${MAPFILE[@]}")
-
-    mapfile -t < <( xmlstarlet sel -t -m "/systemList/system"  -v "extension" -n ${es_systems_path} | sed "s/.//" | sed "s/ ./,/g" | sed "s/^/*.{/" | sed "s/$/}/" )
-    GAME_EXTENSIONS=("${MAPFILE[@]}")
+    mapfile SYSTEMS -t < <( \
+        grep -P "<name>[^<]*<" ${es_systems_path} \
+            | sed 's/<[\/]*name>//g' \
+            | sed 's/ //g' )
+    mapfile GAME_EXTENSIONS -t < <( \
+        grep -P "<extension>[^<]*<" ${es_systems_path} \
+            | sed 's/[ ]*<[\/]*extension>//g' \
+            | sed "s/[ ]*\./,/g" \
+            | sed "s/^,/*.{/" \
+            | sed "s/$/}/" )
 
     for i in "${!SYSTEMS[@]}"; do
+        echo "${SYSTEMS[$i]} = ${SYSTEM}"
         if [ "${SYSTEMS[$i]}" = "$SYSTEM" ]; then
            SYSTEM_INDEX="$i"
+           echo "System index set!"
         fi
     done
 }
@@ -208,7 +220,13 @@ if test -a "/opt/retropie/configs/all/rpie-settings.cfg"; then
     if [ $? -eq 0 ]; then
         echo "Settings valid!"
         getSystemsExtensionExclusions
-
+# DEBUG CODE BEGIN 
+# REMOVE WHEN DONE TESTING
+        echo "Systems ${SYSTEMS[@]}"
+        echo "Extensions: ${GAME_EXTENSIONS[@]}"
+        echo "System index: ${SYSTEM_INDEX}"
+        exit 1
+#DEBUG CODE END
         if [ $# -eq 0 ]; then
             printUsage
         elif [ $# -eq 1 ]; then
