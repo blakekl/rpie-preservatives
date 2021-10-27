@@ -1,13 +1,8 @@
 #!/usr/bin/env bash
 ###############################################################################
-# Scans the es_systems_path file to find the extensions of  rom files. This 
-# data is then used to build an exclusion list, so we don't end up syncing 
+# Scans the es_systems_path file to find the extensions of  rom files. This
+# data is then used to build an exclusion list, so we don't end up syncing
 # large rom files by mistake.
-#
-# could possibly replace the xmlstarlet commands with something like this
-# instead. Wouldn't require xmlstarlet to be installed anymore, which would be
-# nice.
-# grep -P "(<name>|<extension>)[^<]*<" /etc/emulationstation/es_systems.cfg | sed 's/<name>//g' | sed 's/<extension>//g' | sed 's/<\/name>//g' | sed 's/<\/extension>//g'
 ###############################################################################
 getSystemsExtensionExclusions() {
     mapfile -t < <( \
