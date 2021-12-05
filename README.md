@@ -85,6 +85,35 @@ rpie-settings.cfg is a file that contains various settings for the rpie-preserva
 | sync_save_states | Whether or not to sync save state files (.state*,.0*,.oops). If "true" save states will be stored on the remote.                                                                                                                                                                                                                                                                 | "false"                                |"true" or "false"
 
 
+### Instructions for syncing with Android
+
+I have successfully used this script to keep my retroarch save files in sync with a retropie install. The setup is a bit more complicated, but it does work. You do have to execute the sync functions yourself since it doesn't have an equivalent for run command on-start/on-end commands built into retropie.
+
+#### Prerequisites
+
+ - Root your device.
+ - Install rclone as described in the linux section above.
+ - Install the magisk module that grants full read/write access to the sd card. It's called `ExSDCard Access Enabler`.  When setting any paths up in the script, sure to use the now writable path of `/mnt/media_rw/` that is created by this module.
+ - Install termux and grant super user permissions.
+ - Your roms sdcard folder must match the retroarch roms directory structure.
+
+#### Setup
+
+Once have termux ready, you'll need to download this script to the android device.
+ Next, you'll need to either copy over or create an es_systems.cfg file and tell the script where it's located by setting the `es_systems_path` value.
+ Also set your roms path using the `/mnt/media_rw` path to your roms on the sdCard.
+
+Last, you need to updat the retroarch config file to change your save locations. On android, it defaults to `saves` `savestates` (or something like that) in the retroarch home directory, which is -&rarr; `/data/data/com.retroarch/`. inside the root folder, there is a retroarch.cfg file. You'll need to edit it and change the settings that control where save files and save states are saved. The keys for the settings are 
+  
+  - `savefiles_in_content_dir`
+  - `savestates_in_content_dir`
+
+I think they removed these settings from the UI for some reason, but they're still available in the file.
+ 
+You'll also want to move all the save files that are in there (if any) to the appropriate roms folder on your sd card.
+
+Once that is done, your saves can be synced. You have to run the scripts with the `su` permissions in termux. I created a simple wrapper script that runs su before executing the rpie-preservatives.sh script so I didn't have to do this. See the docs on how to use the script.
+
 ## es_systems.cfg
 
 ### What is it?
