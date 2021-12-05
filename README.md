@@ -9,7 +9,6 @@
     - [excluded files](#excluded-files)
   - [Installation](#installation)
     - [Install Dependencies](#install-dependencies)
-      - [xmlstarlet:](#xmlstarlet)
       - [rclone:](#rclone)
     - [Install rpie-preservatives](#install-rpie-preservatives)
   - [rpie-settings.cfg](#rpie-settingscfg)
@@ -49,10 +48,6 @@ If your system does not match these, either update your file system to match thi
 ## Installation
 
 ### Install Dependencies
-
-#### xmlstarlet:
-
-`sudo apt-get install xmlstarlet`
 
 #### rclone:
 

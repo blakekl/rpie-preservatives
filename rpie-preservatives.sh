@@ -1,14 +1,22 @@
 #!/usr/bin/env bash
 ###############################################################################
-# Scans the es_systems_path file to find the extensions of  rom files. This 
-# data is then used to build an exclusion list, so we don't end up syncing 
+# Scans the es_systems_path file to find the extensions of  rom files. This
+# data is then used to build an exclusion list, so we don't end up syncing
 # large rom files by mistake.
 ###############################################################################
 getSystemsExtensionExclusions() {
-    mapfile -t < <( xmlstarlet sel -t -m "/systemList/system"  -v "name" -n ${es_systems_path} )
+    mapfile -t < <( \
+        grep -P "<name>[^<]*<" ${es_systems_path} \
+            | sed 's/<[\/]*name>//g' \
+            | sed 's/ //g' )
     SYSTEMS=("${MAPFILE[@]}")
 
-    mapfile -t < <( xmlstarlet sel -t -m "/systemList/system"  -v "extension" -n ${es_systems_path} | sed "s/.//" | sed "s/ ./,/g" | sed "s/^/*.{/" | sed "s/$/}/" )
+    mapfile -t < <( \
+        grep -P "<extension>[^<]*<" ${es_systems_path} \
+            | sed 's/[ ]*<[\/]*extension>//g' \
+            | sed "s/[ ]*\./,/g" \
+            | sed "s/^,/*.{/" \
+            | sed "s/$/}/" )
     GAME_EXTENSIONS=("${MAPFILE[@]}")
 
     for i in "${!SYSTEMS[@]}"; do
