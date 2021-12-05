@@ -11,6 +11,7 @@
     - [Install Dependencies](#install-dependencies)
       - [rclone:](#rclone)
     - [Install rpie-preservatives](#install-rpie-preservatives)
+    - [ Instructions for syncing with Android](#instructions-for-syncing-with-android)
   - [rpie-settings.cfg](#rpie-settingscfg)
   - [Disclaimer](#disclaimer)
   - [FAQ](#faq)
