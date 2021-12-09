@@ -62,7 +62,7 @@ Click on the remote storage service you want to use at [https://rclone.org/docs]
 
 Make sure the dependencies are installed before running this.
 
-- Download the archive from releases. Make sure `install.sh` is executable (`chmod +x ./install.sh`) and then run the installer. `./install.sh`.
+- Clone the repository. Make sure `install.sh` is executable (`chmod +x ./install.sh`) and then run the installer. `./install.sh`.
   - It will ask for your password if you are not root.
 - Copy the /opt/retropie/configs/all/rpie-settings.cfg.example file to /opt/retropie/configs/all/rpie-setting.cfg
   - Make any edits to the config file if you don't like the default settings.
