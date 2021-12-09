@@ -8,6 +8,7 @@
   - [How it works](#how-it-works)
     - [excluded files](#excluded-files)
   - [Installation](#installation)
+    - [Update](#update)
     - [Install Dependencies](#install-dependencies)
       - [rclone:](#rclone)
     - [Install rpie-preservatives](#install-rpie-preservatives)
