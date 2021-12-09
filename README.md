@@ -48,6 +48,10 @@ If your system does not match these, either update your file system to match thi
 
 ## Installation
 
+### Update
+
+To update the script, just be sure to checkout the latest master branch and execute install.sh again. Double check your config file against the example to make sure you aren't missing any options. That should be all you need to do.
+
 ### Install Dependencies
 
 #### rclone:
