@@ -86,6 +86,7 @@ syncIfValidSystem() {
     case $SYSTEM in 
         retropie) echo "skipping retropie directory" ;;
         kodi) echo "skipping kodi" ;;
+	pc) echo "skipping pc" ;;
         *) syncDirectory ;;
     esac
 }
