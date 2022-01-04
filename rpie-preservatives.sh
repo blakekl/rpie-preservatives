@@ -58,7 +58,7 @@ syncDirectory() {
     echo "Syncing $SYSTEM save files..."
     echo ""
     rclone \
-        -n \
+#        -n \
 	sync -v -L "${source}" "${dest}" -P \
         --filter "- *.{${states}${patch_files}xml,txt,chd,DS_Store}" \
         --filter "- media/**" \
