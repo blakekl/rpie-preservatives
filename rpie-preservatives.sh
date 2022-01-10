@@ -69,7 +69,6 @@ syncSystem() {
     echo ""
     rclone \
 	sync -v -L "${source}" "${dest}" -P \
-        --dry-run \
         --filter "- *.{${states}${patch_files}xml,txt,chd,DS_Store}" \
         --filter "- media/**" \
         --filter "- images/" \
