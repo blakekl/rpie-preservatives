@@ -7,14 +7,12 @@
 getSystemsExtensionExclusions() {
     mapfile -t < <( \
         grep -P "<name>[^<]*<" ${es_systems_path} \
-            | sed 's/<[\/]*name>//g' \
-            | sed 's/ //g' )
+            | sed 's/[ ]*<[\/]*name>//g' )
     SYSTEMS=("${MAPFILE[@]}")
 
     mapfile -t < <( \
         grep -P "<fullname>[^<]*<" ${es_systems_path} \
-            | sed 's/<[\/]*fullname>//g' \
-            | sed 's/ //g' )
+            | sed 's/[ ]*<[\/]*fullname>//g' )
     SYSTEM_NAMES=("${MAPFILE[@]}")
 
     mapfile -t < <( \
@@ -77,13 +75,27 @@ syncDirectory() {
 }
 
 ###############################################################################
+# exits with 0 if the system is valid for syncing. Exits with 1 otherwise.
+###############################################################################
+isValidSystem() {
+    local exit_code=0
+    case $1 in
+        retropie) exit_code=1;;
+        kodi) exit_code=1;;
+        *) exit 0;;
+    esac
+    exit $exit_code
+}
+
+###############################################################################
 # Checks whether a system is valid to sync or not. If valid, syncs the system.
 # Skips syncing on systems that don't support it (mostly mame). This function
 # is not complete, as I don't have roms for all the systems supported by
 # retroarch, and I don't plan on emulating them all either.
 ###############################################################################
 syncIfValidSystem() {
-    case $SYSTEM in 
+    local system=$1
+    case $system in 
         retropie) echo "skipping retropie directory" ;;
         kodi) echo "skipping kodi" ;;
         *) syncDirectory ;;
@@ -204,20 +216,41 @@ printMissingConfig() {
     exit 1
 }
 
-showMenuDialog() {
-    DIALOG_OPTIONS=""
+###############################################################################
+# Shows a menu to select systems to sync and whether to upload or download.
+###############################################################################
+showDialog() {
+    local upload="0"
+    local download="3"
+
+    local dialog_options=""
     for i in "${!SYSTEMS[@]}"; do
         SYSTEM_INDEX="$i"
         SYSTEM="${SYSTEMS[$i]}"
-        SYSTEM_FULL_NAME="${SYSTEM_NAMES[$i]}"
-        DIALOG_OPTIONS="${DIALOG_OPTIONS} \"${SYSTEM}\" \"${SYSTEM_FULL_NAME}\" \"\""
+        dialog_options="${dialog_options} $i $SYSTEM off"
     done
     exec 3>&1;
-    selection=$(dialog --ok-label "Upload" --extra-button --extra-label " Download " --checklist "Select systems to sync" 0 0 0 ${DIALOG_OPTIONS} 2>&1 1>&3);
+    selections=$( dialog \
+        --backtitle "Rpie-Preservatives" \
+        --ok-label "Upload" \
+        --extra-button --extra-label " Download " \
+        --checklist "Select systems to sync" 0 0 0 \
+        ${dialog_options} \
+        2>&1 1>&3);
     exit_code=$?
     2>&1 1>&-;
-    echo "${selection}"
-    echo "${exit_code}"
+    if [ $exit_code -eq $upload ]; then
+        echo "UPLOAD"
+    elif [ $exit_code -eq $download ]; then
+        echo "DOWNLOAD"
+    else
+        echo "CANCEL"
+    fi
+
+    for selection in ${selections[@]}
+    do
+        echo "${SYSTEMS[$selection]}"
+    done
 }
 
 COMMAND=$1
@@ -225,6 +258,9 @@ SYSTEM=$2
 EMULATOR=$3
 ROM_PATH=$4
 RUN_COMMAND=$5
+
+UPLOAD="upload"
+DOWNLAD="download"
 
 GREEN="\e[92m"
 RED="\e[91m"
@@ -241,9 +277,9 @@ if test -a "/opt/retropie/configs/all/rpie-settings.cfg"; then
 
         if [ $# -eq 0 ]; then
             printUsage
-            showMenuDialog
+            showDialog
         elif [ $# -eq 1 ]; then
-            if [ "$1" = "upload" ] || [ "$1" = "download" ]; then
+            if [ "$COMMAND" = "$UPLOAD" ] || [ "$COMMAND" = "$DOWNLOAD" ]; then
                 printAllSystemWarning
                 for i in "${!SYSTEMS[@]}"; do
                     SYSTEM_INDEX="$i"
