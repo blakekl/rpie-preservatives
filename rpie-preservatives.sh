@@ -61,12 +61,15 @@ syncDirectory() {
 	sync -v -L "${source}" "${dest}" -P \
         --filter "- *.{${states}${patch_files}xml,txt,chd,DS_Store}" \
         --filter "- media/**" \
+        --filter "- images/" \
+        --filter "- videos/" \
 	--filter "+ mame*/nvram/*.nv" \
 	--filter "+ mame*/nvram/*/nvram" \
 	--filter "+ mame*/hi/**" \
         --filter "- mame*/**" \
 	--filter "- fbneo*/**" \
         --filter "- **sd.raw" \
+        --filter "- **.m3u" \
         --filter "- Mupen64plus/**" \
         --filter "- User/Cache**" \
         --filter "- User/Config**" \
@@ -86,6 +89,7 @@ syncIfValidSystem() {
         retropie) echo "skipping retropie directory" ;;
         kodi) echo "skipping kodi" ;;
 	pc) echo "skipping pc" ;;
+        ports) echo "skipping ports" ;;
         *) syncDirectory ;;
     esac
 }
