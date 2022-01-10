@@ -28,8 +28,6 @@ getSystemsExtensionExclusions() {
 # takes an array of systems to sync. 
 ###############################################################################
 syncSystems() {
-    echo "total systems to sync: ${systems[@]}"
-
     for system in "$@"; do
         syncIfValidSystem "${system}"
     done
@@ -249,6 +247,7 @@ showDialog() {
     done
     exec 3>&1;
     selections=$( dialog \
+        --keep-tite \
         --backtitle "Rpie-Preservatives" \
         --ok-label "Upload" \
         --extra-button --extra-label " Download " \
