@@ -57,17 +57,22 @@ syncDirectory() {
     echo ""
     echo "Syncing $SYSTEM save files..."
     echo ""
-    rclone sync -v -L "${source}" "${dest}" -P \
-        --exclude "*.{${states}${patch_files}xml,txt,chd,DS_Store}" \
-        --exclude "media/**" \
-        --exclude "mame*/**" \
-        --exclude "**sd.raw" \
-        --exclude "Mupen64plus/**" \
-        --exclude "User/Cache**" \
-        --exclude "User/Config**" \
-        --exclude "User/Logs**" \
-        --exclude "PSP/SYSTEM/**" \
-        --exclude "$exclude"
+    rclone \
+	sync -v -L "${source}" "${dest}" -P \
+        --filter "- *.{${states}${patch_files}xml,txt,chd,DS_Store}" \
+        --filter "- media/**" \
+	--filter "+ mame*/nvram/*.nv" \
+	--filter "+ mame*/nvram/*/nvram" \
+	--filter "+ mame*/hi/**" \
+        --filter "- mame*/**" \
+	--filter "- fbneo*/**" \
+        --filter "- **sd.raw" \
+        --filter "- Mupen64plus/**" \
+        --filter "- User/Cache**" \
+        --filter "- User/Config**" \
+        --filter "- User/Logs**" \
+        --filter "- PSP/SYSTEM/**" \
+        --filter "- $exclude" 
 }
 
 ###############################################################################
@@ -80,6 +85,7 @@ syncIfValidSystem() {
     case $SYSTEM in 
         retropie) echo "skipping retropie directory" ;;
         kodi) echo "skipping kodi" ;;
+	pc) echo "skipping pc" ;;
         *) syncDirectory ;;
     esac
 }
