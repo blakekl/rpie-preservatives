@@ -12,6 +12,12 @@ getSystemsExtensionExclusions() {
     SYSTEMS=("${MAPFILE[@]}")
 
     mapfile -t < <( \
+        grep -P "<fullname>[^<]*<" ${es_systems_path} \
+            | sed 's/<[\/]*fullname>//g' \
+            | sed 's/ //g' )
+    SYSTEM_NAMES=("${MAPFILE[@]}")
+
+    mapfile -t < <( \
         grep -P "<extension>[^<]*<" ${es_systems_path} \
             | sed 's/[ ]*<[\/]*extension>//g' \
             | sed "s/[ ]*\./,/g" \
@@ -198,6 +204,22 @@ printMissingConfig() {
     exit 1
 }
 
+showMenuDialog() {
+    DIALOG_OPTIONS=""
+    for i in "${!SYSTEMS[@]}"; do
+        SYSTEM_INDEX="$i"
+        SYSTEM="${SYSTEMS[$i]}"
+        SYSTEM_FULL_NAME="${SYSTEM_NAMES[$i]}"
+        DIALOG_OPTIONS="${DIALOG_OPTIONS} \"${SYSTEM}\" \"${SYSTEM_FULL_NAME}\" \"\""
+    done
+    exec 3>&1;
+    selection=$(dialog --ok-label "Upload" --extra-button --extra-label " Download " --checklist "Select systems to sync" 0 0 0 ${DIALOG_OPTIONS} 2>&1 1>&3);
+    exit_code=$?
+    2>&1 1>&-;
+    echo "${selection}"
+    echo "${exit_code}"
+}
+
 COMMAND=$1
 SYSTEM=$2
 EMULATOR=$3
@@ -219,6 +241,7 @@ if test -a "/opt/retropie/configs/all/rpie-settings.cfg"; then
 
         if [ $# -eq 0 ]; then
             printUsage
+            showMenuDialog
         elif [ $# -eq 1 ]; then
             if [ "$1" = "upload" ] || [ "$1" = "download" ]; then
                 printAllSystemWarning
