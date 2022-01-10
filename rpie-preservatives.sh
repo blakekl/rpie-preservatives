@@ -11,11 +11,6 @@ getSystemsExtensionExclusions() {
     SYSTEMS=("${MAPFILE[@]}")
 
     mapfile -t < <( \
-        grep -P "<fullname>[^<]*<" ${es_systems_path} \
-            | sed 's/[ ]*<[\/]*fullname>//g' )
-    SYSTEM_NAMES=("${MAPFILE[@]}")
-
-    mapfile -t < <( \
         grep -P "<extension>[^<]*<" ${es_systems_path} \
             | sed 's/[ ]*<[\/]*extension>//g' \
             | sed "s/[ ]*\./,/g" \
@@ -83,18 +78,18 @@ syncDirectory() {
 }
 
 ###############################################################################
-# Exits with 0 if the system is valid for syncing. Exits with 1 otherwise.
+# Exits with "true" if the system is valid for syncing. Exits with "false" 
+# otherwise.
 ###############################################################################
 isValidSystem() {
-    local exit_code=0
+    local exit_code="true"
     case $1 in
-        retropie) exit_code=1;;
-        kodi) exit_code=1;;
-        pc) exit_code=1;;
-        ports) exit_code=1;;
-        *) exit 0;;
+        retropie) exit_code="false";;
+        kodi) exit_code="false";;
+        pc) exit_code="false";;
+        ports) exit_code="false";;
     esac
-    exit $exit_code
+    echo "$exit_code"
 }
 
 ###############################################################################
@@ -105,13 +100,12 @@ isValidSystem() {
 ###############################################################################
 syncIfValidSystem() {
     local system=$1
-    case $system in 
-        retropie) echo "skipping retropie directory" ;;
-        kodi) echo "skipping kodi" ;;
-	pc) echo "skipping pc" ;;
-        ports) echo "skipping ports" ;;
-        *) syncDirectory ;;
-    esac
+    local isValid=$(isValidSystem "${system}")
+    if [ $isValid = "true" ]; then
+        syncDirectory
+    else
+        echo "skipping ${system} directory"
+    fi
 }
 
 ###############################################################################
@@ -220,9 +214,11 @@ showDialog() {
 
     local dialog_options=""
     for i in "${!SYSTEMS[@]}"; do
-        SYSTEM_INDEX="$i"
-        SYSTEM="${SYSTEMS[$i]}"
-        dialog_options="${dialog_options} $i $SYSTEM off"
+        local system="${SYSTEMS[$i]}"
+        local isValid=$(isValidSystem ${system})
+        if [ $isValid = "true" ]; then
+            dialog_options="${dialog_options} $i $system off"
+        fi
     done
     exec 3>&1;
     selections=$( dialog \
@@ -271,7 +267,6 @@ if test -a "/opt/retropie/configs/all/rpie-settings.cfg"; then
         getSystemsExtensionExclusions
 
         if [ $# -eq 0 ]; then
-            printCountdown
             showDialog
         elif [ $# -eq 1 ]; then
             if [ "$COMMAND" = "$UPLOAD" ] || [ "$COMMAND" = "$DOWNLOAD" ]; then
@@ -279,7 +274,7 @@ if test -a "/opt/retropie/configs/all/rpie-settings.cfg"; then
                 for i in "${!SYSTEMS[@]}"; do
                     SYSTEM_INDEX="$i"
                     SYSTEM="${SYSTEMS[$i]}"
-                    syncIfValidSystem
+                    syncIfValidSystem "${SYSTEM}"
                 done
             fi
         else
