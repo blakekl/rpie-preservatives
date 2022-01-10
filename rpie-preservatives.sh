@@ -83,13 +83,15 @@ syncDirectory() {
 }
 
 ###############################################################################
-# exits with 0 if the system is valid for syncing. Exits with 1 otherwise.
+# Exits with 0 if the system is valid for syncing. Exits with 1 otherwise.
 ###############################################################################
 isValidSystem() {
     local exit_code=0
     case $1 in
         retropie) exit_code=1;;
         kodi) exit_code=1;;
+        pc) exit_code=1;;
+        ports) exit_code=1;;
         *) exit 0;;
     esac
     exit $exit_code
@@ -98,7 +100,7 @@ isValidSystem() {
 ###############################################################################
 # Checks whether a system is valid to sync or not. If valid, syncs the system.
 # Skips syncing on systems that don't support it (mostly mame). This function
-# is not complete, as I don't have roms for all the systems supported by
+# is not complete, as I don't have roms for all the possible systems in ES vs 
 # retroarch, and I don't plan on emulating them all either.
 ###############################################################################
 syncIfValidSystem() {
@@ -110,18 +112,6 @@ syncIfValidSystem() {
         ports) echo "skipping ports" ;;
         *) syncDirectory ;;
     esac
-}
-
-###############################################################################
-# Prints instructions.
-###############################################################################
-printUsage() {
-    echo "Usage: rpie-preservatives.sh <command> <system name> <emulator> <rom path> <full command>"
-    echo "  command is required. Must be either 'upload' or 'download'."
-    echo "  system name is the name of the system in es_systems.cfg (eg:  nes,atari2600,gba,etc)."
-    echo "  emulator: the core name that was launched (eg: lr-stella,lr-fceumm,etc)"
-    echo "  rom path: full path to the rom file"
-    echo "  full command: the full command line used to launch the emulator."
 }
 
 ###############################################################################
@@ -148,19 +138,14 @@ printConfig() {
 # prints a countdown before proceeding.
 ###############################################################################
 printCountdown() {
-    printf "syncing in 5"
-    sleep 1
-    printf "\rsyncing in 4"
-    sleep 1
-    printf "\rsyncing in 3"
-    sleep 1
-    printf "\rsyncing in 2"
-    sleep 1
-    printf "\rsyncing in 1"
-    sleep 1
-    printf "\rsyncing in 0"
+    local delay=10
+    while [ $delay -ge 0 ]
+    do
+        printf "\rsyncing in $delay "
+        sleep 1
+        ((delay--))
+    done
     printf "\r*** Syncing ***"
-
 }
 
 
@@ -286,7 +271,7 @@ if test -a "/opt/retropie/configs/all/rpie-settings.cfg"; then
         getSystemsExtensionExclusions
 
         if [ $# -eq 0 ]; then
-            printUsage
+            printCountdown
             showDialog
         elif [ $# -eq 1 ]; then
             if [ "$COMMAND" = "$UPLOAD" ] || [ "$COMMAND" = "$DOWNLOAD" ]; then
@@ -296,8 +281,6 @@ if test -a "/opt/retropie/configs/all/rpie-settings.cfg"; then
                     SYSTEM="${SYSTEMS[$i]}"
                     syncIfValidSystem
                 done
-            else
-                printUsage
             fi
         else
             syncIfValidSystem
