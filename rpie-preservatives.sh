@@ -16,12 +16,22 @@ getSystemsExtensionExclusions() {
             | sed "s/[ ]*\./,/g" \
             | sed "s/^,/*.{/" \
             | sed "s/$/}/" )
-    GAME_EXTENSIONS=("${MAPFILE[@]}")
+    local extensions=("${MAPFILE[@]}")
 
     for i in "${!SYSTEMS[@]}"; do
-        if [ "${SYSTEMS[$i]}" = "$SYSTEM" ]; then
-           SYSTEM_INDEX="$i"
-        fi
+	local system="${SYSTEMS[$i]}"
+        EXTENSIONS_BY_SYSTEM[$system]="${extensions[$i]}"
+    done
+}
+
+###############################################################################
+# takes an array of systems to sync. 
+###############################################################################
+syncSystems() {
+    echo "total systems to sync: ${systems[@]}"
+
+    for system in "$@"; do
+        syncIfValidSystem "${system}"
     done
 }
 
@@ -29,20 +39,21 @@ getSystemsExtensionExclusions() {
 # uses rclone to sync the remote directory with the local file system for the
 # system we are running. 
 ###############################################################################
-syncDirectory() {
-    local system_path="${roms_path}/${SYSTEM}"
-    local exclude="${GAME_EXTENSIONS[$SYSTEM_INDEX]}"
+syncSystem() {
+    local system=$1
+    local system_path="${roms_path}/${system}"
+    local exclude="${EXTENSIONS_BY_SYSTEM[$system]}"
     local source=""
     local dest=""
     local states="state*,oops,0*,"
     local patch_files="ips,ups,bps,"
 
     if [ "$COMMAND" = "download" ]; then
-        source="${rclone_drive}/${SYSTEM}"
+        source="${rclone_drive}/${system}"
         dest="${system_path}"
     else
         source="${system_path}"
-        dest="${rclone_drive}/${SYSTEM}"
+        dest="${rclone_drive}/${system}"
     fi
 
     if [ "$sync_save_states" = "$TRUE" ]; then
@@ -54,10 +65,11 @@ syncDirectory() {
     fi
 
     echo ""
-    echo "Syncing $SYSTEM save files..."
+    echo "Syncing $system save files..."
     echo ""
     rclone \
 	sync -v -L "${source}" "${dest}" -P \
+        --dry-run \
         --filter "- *.{${states}${patch_files}xml,txt,chd,DS_Store}" \
         --filter "- media/**" \
         --filter "- images/" \
@@ -78,7 +90,7 @@ syncDirectory() {
 }
 
 ###############################################################################
-# Exits with "true" if the system is valid for syncing. Exits with "false" 
+# Returns with "true" if the system is valid for syncing. Returns with "false" 
 # otherwise.
 ###############################################################################
 isValidSystem() {
@@ -102,18 +114,34 @@ syncIfValidSystem() {
     local system=$1
     local isValid=$(isValidSystem "${system}")
     if [ $isValid = "true" ]; then
-        syncDirectory
+        syncSystem ${system}
     else
         echo "skipping ${system} directory"
     fi
 }
 
 ###############################################################################
+# Prints instructions.
+###############################################################################
+printUsage() {
+    echo "Usage: rpie-preservatives.sh <command> <system name> <emulator> <rom path> <full command>"
+    echo "  command is required. Must be either 'upload' or 'download'."
+    echo "  system name is the name of the system in es_systems.cfg (eg:  nes,atari2600,gba,etc)."
+    echo "  emulator: the core name that was launched (eg: lr-stella,lr-fceumm,etc)"
+    echo "  rom path: full path to the rom file"
+    echo "  full command: the full command line used to launch the emulator."
+}
+
+###############################################################################
 # prints a warning that all saves will be synced. Displays instructions on
-# cancelling the script and provides a 5 second timer to allow cancelling.
+# cancelling the script and provides a dela to allow cancelling.
 ###############################################################################
 printAllSystemWarning() {
+    echo ""
+    echo "!!!!!    WARNING   !!!!!"
+    echo ""
     echo "No system passed in. All saves will be ${COMMAND}ed. (Ctl-C to abort)"
+    echo ""
     printCountdown
 }
 
@@ -169,7 +197,7 @@ verifySettings() {
         printSettingNotFoundError "roms_path"
         result=1
     fi
-    
+
     if ! [ -f "${es_systems_path}" ]; then
         printSettingNotFoundError "es_systems_path"
         result=1
@@ -180,13 +208,13 @@ verifySettings() {
         printSettingBooleanError "sync_save_states"
         result=1
     fi
-    
+
     sync_patch_files=`echo "$sync_patch_files" | awk '{print tolower($0)}'`
     if [[ "$sync_patch_files" != "$TRUE" ]] && [[ "$sync_patch_files" != "$FALSE" ]]; then
         printSettingBooleanError "sync_patch_files"
         result=1
     fi
-    
+
     if ! [[ "$rclone_drive" =~ ^.+:.+$ ]]; then
         echo "   rclone_drive does not appear to be valid. Must be in the format remote:DESTINATION. Correct value in rpie-settings.cfg"
         result=1
@@ -217,7 +245,7 @@ showDialog() {
         local system="${SYSTEMS[$i]}"
         local isValid=$(isValidSystem ${system})
         if [ $isValid = "true" ]; then
-            dialog_options="${dialog_options} $i $system off"
+            dialog_options="${dialog_options} $system $i off"
         fi
     done
     exec 3>&1;
@@ -231,17 +259,15 @@ showDialog() {
     exit_code=$?
     2>&1 1>&-;
     if [ $exit_code -eq $upload ]; then
-        echo "UPLOAD"
+        COMMAND="upload"
     elif [ $exit_code -eq $download ]; then
-        echo "DOWNLOAD"
+        COMMAND="download"
     else
-        echo "CANCEL"
+        exit 0
     fi
 
-    for selection in ${selections[@]}
-    do
-        echo "${SYSTEMS[$selection]}"
-    done
+    local systems=( $selections )
+    syncSystems ${systems[@]}
 }
 
 COMMAND=$1
@@ -259,6 +285,8 @@ PLAIN="\e[39m"
 TRUE="true"
 FALSE="false"
 
+declare -A EXTENSIONS_BY_SYSTEM
+
 if test -a "/opt/retropie/configs/all/rpie-settings.cfg"; then
     . /opt/retropie/configs/all/rpie-settings.cfg
     verifySettings
@@ -271,14 +299,12 @@ if test -a "/opt/retropie/configs/all/rpie-settings.cfg"; then
         elif [ $# -eq 1 ]; then
             if [ "$COMMAND" = "$UPLOAD" ] || [ "$COMMAND" = "$DOWNLOAD" ]; then
                 printAllSystemWarning
-                for i in "${!SYSTEMS[@]}"; do
-                    SYSTEM_INDEX="$i"
-                    SYSTEM="${SYSTEMS[$i]}"
-                    syncIfValidSystem "${SYSTEM}"
-                done
+                syncSystems "${SYSTEMS[@]}"
+            else
+                printUsage
             fi
         else
-            syncIfValidSystem
+            syncIfValidSystem "$SYSTEM"
         fi
     else
         exit 1
