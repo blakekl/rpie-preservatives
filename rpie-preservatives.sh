@@ -244,7 +244,7 @@ showDialog() {
     local upload="0"
     local download="3"
 
-    local declare -a options=()
+    local options
     for i in "${!SYSTEMS[@]}"; do
         local system="${SYSTEMS[$i]}"
         local isValid=$(isValidSystem ${system})
