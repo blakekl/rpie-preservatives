@@ -244,14 +244,15 @@ showDialog() {
     local upload="0"
     local download="3"
 
-    local dialog_options=""
+    local declare -a options=()
     for i in "${!SYSTEMS[@]}"; do
         local system="${SYSTEMS[$i]}"
         local isValid=$(isValidSystem ${system})
         if [ $isValid = "true" ]; then
-            dialog_options="${dialog_options} $system $i off"
+            options+=("${system} ${i} off")
         fi
     done
+
     exec 3>&1;
     selections=$( dialog \
         --keep-tite \
@@ -259,7 +260,7 @@ showDialog() {
         --ok-label "Upload" \
         --extra-button --extra-label " Download " \
         --checklist "Select systems to sync" 0 0 0 \
-        ${dialog_options} \
+        ${options[@]} \
         2>&1 1>&3);
     exit_code=$?
     2>&1 1>&-;
@@ -279,7 +280,8 @@ showDialog() {
     echo "command: ${COMMAND}"
 
     local systems=( $selections )
-    syncSystems ${systems[@]}
+    echo "systems: ${systems[@]}"
+#    syncSystems ${systems[@]}
 }
 
 COMMAND=$1
