@@ -43,6 +43,7 @@ syncSystem() {
     local exclude="${EXTENSIONS_BY_SYSTEM[$system]}"
     local source=""
     local dest=""
+    local dryrun=""
     local states="state*,oops,0*,"
     local patch_files="ips,ups,bps,"
 
@@ -62,11 +63,16 @@ syncSystem() {
         patch_files=""
     fi
 
+    if [ "$DEBUG" = "$TRUE" ]; then
+        dryrun="--dry-run"
+    fi
+
     echo ""
     echo "Syncing $system save files..."
     echo ""
     rclone \
 	sync -v -L "${source}" "${dest}" -P \
+        $dryrun \
         --filter "- *.{${states}${patch_files}xml,txt,chd,DS_Store}" \
         --filter "- media/**" \
         --filter "- images/" \
@@ -76,6 +82,7 @@ syncSystem() {
 	--filter "+ mame*/hi/**" \
         --filter "- mame*/**" \
 	--filter "- fbneo*/**" \
+        --filter "- duckstation_cache/**"
         --filter "- **sd.raw" \
         --filter "- **.m3u" \
         --filter "- Mupen64plus/**" \
@@ -282,6 +289,8 @@ RED="\e[91m"
 PLAIN="\e[39m"
 TRUE="true"
 FALSE="false"
+
+DEBUG="$FALSE"
 
 declare -A EXTENSIONS_BY_SYSTEM
 
