@@ -263,13 +263,20 @@ showDialog() {
         2>&1 1>&3);
     exit_code=$?
     2>&1 1>&-;
-    if [ $exit_code -eq $upload ]; then
+
+    case $exit_code in
+    $upload)
         COMMAND="upload"
-    elif [ $exit_code -eq $download ]; then
+    ;;
+    $download)
         COMMAND="download"
-    else
+    ;;
+    *)
         exit 0
-    fi
+    ;;
+    esac
+
+    echo "command: ${COMMAND}"
 
     local systems=( $selections )
     syncSystems ${systems[@]}
