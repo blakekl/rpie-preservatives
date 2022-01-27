@@ -84,7 +84,6 @@ syncSystem() {
 	--filter "- fbneo*/**" \
         --filter "- duckstation_cache/**"
         --filter "- **sd.raw" \
-        --filter "- **.m3u" \
         --filter "- Mupen64plus/**" \
         --filter "- User/Cache**" \
         --filter "- User/Config**" \
@@ -294,8 +293,6 @@ RED="\e[91m"
 PLAIN="\e[39m"
 TRUE="true"
 FALSE="false"
-
-DEBUG="$FALSE"
 
 declare -A EXTENSIONS_BY_SYSTEM
 
