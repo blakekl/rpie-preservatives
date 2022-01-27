@@ -73,16 +73,16 @@ syncSystem() {
     rclone \
 	sync -v -L "${source}" "${dest}" -P \
         $dryrun \
+	--filter "+ mame*/nvram/*.nv" \
+	--filter "+ mame*/nvram/*/nvram" \
+	--filter "+ mame*/hi/**" \
         --filter "- *.{${states}${patch_files}xml,txt,chd,DS_Store}" \
         --filter "- media/**" \
         --filter "- images/" \
         --filter "- videos/" \
-	--filter "+ mame*/nvram/*.nv" \
-	--filter "+ mame*/nvram/*/nvram" \
-	--filter "+ mame*/hi/**" \
         --filter "- mame*/**" \
 	--filter "- fbneo*/**" \
-        --filter "- duckstation_cache/**"
+        --filter "- duckstation_cache/**" \
         --filter "- **sd.raw" \
         --filter "- Mupen64plus/**" \
         --filter "- User/Cache**" \
