@@ -249,21 +249,20 @@ showDialog() {
         local system="${SYSTEMS[$i]}"
         local isValid=$(isValidSystem ${system})
         if [ $isValid = "true" ]; then
-            options+=("${system} ${i} off")
+            options+=("${system}" "${i}" "off")
         fi
     done
 
-    exec 3>&1;
-    selections=$( dialog \
-        --keep-tite \
-        --backtitle "Rpie-Preservatives" \
-        --ok-label "Upload" \
-        --extra-button --extra-label " Download " \
-        --checklist "Select systems to sync" 0 0 0 \
-        ${options[@]} \
-        2>&1 1>&3);
+    cmd=(dialog \
+      --keep-tite \
+      --backtitle "Rpie-Preservatives" \
+      --ok-label "Upload" \
+      --extra-button \
+      --extra-label " Download " \
+      --checklist "Select systems to sync" 0 0 0)
+
+    selections=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
     exit_code=$?
-    2>&1 1>&-;
 
     case $exit_code in
     $upload)
@@ -277,11 +276,8 @@ showDialog() {
     ;;
     esac
 
-    echo "command: ${COMMAND}"
-
     local systems=( $selections )
-    echo "systems: ${systems[@]}"
-#    syncSystems ${systems[@]}
+    syncSystems ${systems[@]}
 }
 
 COMMAND=$1
