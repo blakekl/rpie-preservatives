@@ -68,7 +68,7 @@ syncSystem() {
     fi
 
     echo ""
-    echo "Syncing $system save files..."
+    echo "${COMMAND}ing ${system} save files..."
     echo ""
     rclone \
 	sync -v -L "${source}" "${dest}" -P \
@@ -103,6 +103,7 @@ isValidSystem() {
         kodi) exit_code="false";;
         pc) exit_code="false";;
         ports) exit_code="false";;
+        desktop) exit_code="false";;
     esac
     echo "$exit_code"
 }
@@ -264,19 +265,12 @@ showDialog() {
     exit_code=$?
 
     case $exit_code in
-    $upload)
-        COMMAND="upload"
-    ;;
-    $download)
-        COMMAND="download"
-    ;;
-    *)
-        exit 0
-    ;;
+    $upload) COMMAND="upload";;
+    $download) COMMAND="download";;
+    *) exit 0 ;;
     esac
 
-    local systems=( $selections )
-    syncSystems ${systems[@]}
+    syncSystems ${selections[@]}
 }
 
 COMMAND=$1
