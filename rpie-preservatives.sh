@@ -104,6 +104,10 @@ isValidSystem() {
         pc) exit_code="false";;
         ports) exit_code="false";;
         desktop) exit_code="false";;
+        imageviewer) exit_code="false";;
+        tools) exit_code="false";;
+        mplayer) exit_code="false";;
+        build) exit_code="false";;
     esac
     echo "$exit_code"
 }
