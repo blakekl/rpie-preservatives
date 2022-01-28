@@ -108,6 +108,7 @@ isValidSystem() {
         tools) exit_code="false";;
         mplayer) exit_code="false";;
         build) exit_code="false";;
+        doom) exit_code="false";;
     esac
     echo "$exit_code"
 }
