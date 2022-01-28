@@ -194,7 +194,6 @@ printSettingBooleanError() {
 # Prints out any errors it finds.
 ###############################################################################
 verifySettings() {
-    echo "verifying settings."
     local result=0
 
     if ! [ -d "${roms_path}" ]; then 
@@ -294,7 +293,6 @@ if test -a "/opt/retropie/configs/all/rpie-settings.cfg"; then
     . /opt/retropie/configs/all/rpie-settings.cfg
     verifySettings
     if [ $? -eq 0 ]; then
-        echo "Settings valid!"
         getSystemsExtensionExclusions
 
         if [ $# -eq 0 ]; then
