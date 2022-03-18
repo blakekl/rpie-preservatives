@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+LANG=""
+export TERM=linux
 ###############################################################################
 # Scans the es_systems_path file to find the extensions of  rom files. This
 # data is then used to build an exclusion list, so we don't end up syncing
