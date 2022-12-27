@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+LANG=""
+export TERM=linux
 ###############################################################################
 # Scans the es_systems_path file to find the extensions of  rom files. This
 # data is then used to build an exclusion list, so we don't end up syncing
@@ -43,6 +45,7 @@ syncSystem() {
     local exclude="${EXTENSIONS_BY_SYSTEM[$system]}"
     local source=""
     local dest=""
+    local dryrun=""
     local states="state*,oops,0*,"
     local patch_files="ips,ups,bps,"
 
@@ -62,22 +65,27 @@ syncSystem() {
         patch_files=""
     fi
 
+    if [ "$DEBUG" = "$TRUE" ]; then
+        dryrun="--dry-run"
+    fi
+
     echo ""
-    echo "Syncing $system save files..."
+    echo "${COMMAND}ing ${system} save files..."
     echo ""
     rclone \
 	sync -v -L "${source}" "${dest}" -P \
+        $dryrun \
+	--filter "+ mame*/nvram/*.nv" \
+	--filter "+ mame*/nvram/*/nvram" \
+	--filter "+ mame*/hi/**" \
         --filter "- *.{${states}${patch_files}xml,txt,chd,DS_Store}" \
         --filter "- media/**" \
         --filter "- images/" \
         --filter "- videos/" \
-	--filter "+ mame*/nvram/*.nv" \
-	--filter "+ mame*/nvram/*/nvram" \
-	--filter "+ mame*/hi/**" \
         --filter "- mame*/**" \
 	--filter "- fbneo*/**" \
+        --filter "- duckstation_cache/**" \
         --filter "- **sd.raw" \
-        --filter "- **.m3u" \
         --filter "- Mupen64plus/**" \
         --filter "- User/Cache**" \
         --filter "- User/Config**" \
@@ -97,6 +105,12 @@ isValidSystem() {
         kodi) exit_code="false";;
         pc) exit_code="false";;
         ports) exit_code="false";;
+        desktop) exit_code="false";;
+        imageviewer) exit_code="false";;
+        tools) exit_code="false";;
+        mplayer) exit_code="false";;
+        build) exit_code="false";;
+        doom) exit_code="false";;
     esac
     echo "$exit_code"
 }
@@ -187,7 +201,6 @@ printSettingBooleanError() {
 # Prints out any errors it finds.
 ###############################################################################
 verifySettings() {
-    echo "verifying settings."
     local result=0
 
     if ! [ -d "${roms_path}" ]; then 
@@ -237,35 +250,33 @@ showDialog() {
     local upload="0"
     local download="3"
 
-    local dialog_options=""
+    local options
     for i in "${!SYSTEMS[@]}"; do
         local system="${SYSTEMS[$i]}"
         local isValid=$(isValidSystem ${system})
         if [ $isValid = "true" ]; then
-            dialog_options="${dialog_options} $system $i off"
+            options+=("${system}" "${i}" "off")
         fi
     done
-    exec 3>&1;
-    selections=$( dialog \
-        --keep-tite \
-        --backtitle "Rpie-Preservatives" \
-        --ok-label "Upload" \
-        --extra-button --extra-label " Download " \
-        --checklist "Select systems to sync" 0 0 0 \
-        ${dialog_options} \
-        2>&1 1>&3);
-    exit_code=$?
-    2>&1 1>&-;
-    if [ $exit_code -eq $upload ]; then
-        COMMAND="upload"
-    elif [ $exit_code -eq $download ]; then
-        COMMAND="download"
-    else
-        exit 0
-    fi
 
-    local systems=( $selections )
-    syncSystems ${systems[@]}
+    cmd=(dialog \
+      --keep-tite \
+      --backtitle "Rpie-Preservatives" \
+      --ok-label "Upload" \
+      --extra-button \
+      --extra-label " Download " \
+      --checklist "Select systems to sync" 0 0 0)
+
+    selections=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
+    exit_code=$?
+
+    case $exit_code in
+    $upload) COMMAND="upload";;
+    $download) COMMAND="download";;
+    *) exit 0 ;;
+    esac
+
+    syncSystems ${selections[@]}
 }
 
 COMMAND=$1
@@ -289,7 +300,6 @@ if test -a "/opt/retropie/configs/all/rpie-settings.cfg"; then
     . /opt/retropie/configs/all/rpie-settings.cfg
     verifySettings
     if [ $? -eq 0 ]; then
-        echo "Settings valid!"
         getSystemsExtensionExclusions
 
         if [ $# -eq 0 ]; then
